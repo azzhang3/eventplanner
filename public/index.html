@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Party Planner - Login</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Efficiently manage your events with Party Planner. Log in to plan parties, track details, and stay organized."
+    />
+    <script src="js/login.js"></script>
+    <!-- Keep this one -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto+Slab:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <!-- Import Materialize CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+      rel="stylesheet"
+    />
+    <!-- Import Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+  </head>
+  <body>
+    <div id="loginSection">
+      <!-- Dark Mode Toggle Switch -->
+      <div class="switch" id="loginDark">
+        <label id="dark-modeLabel">
+          Light
+          <input type="checkbox" id="darkModeToggle" />
+          <span class="lever"></span>
+          Dark
+        </label>
+      </div>
+      <h1 id="title">Party Planner</h1>
+      <h1 id="loginText">Login</h1>
+      <form id="loginForm" class="input-field">
+        <div class="input-field">
+          <label for="login-username" id="loginLabel">Username</label>
+          <input
+            type="text"
+            id="login-username"
+            name="username"
+            class="validate"
+            required
+          />
+        </div>
+        <div class="input-field">
+          <label for="login-password" id="loginLabel">Password</label>
+          <input
+            type="password"
+            id="login-password"
+            name="password"
+            class="validate"
+            required
+          />
+        </div>
+        <button type="submit" class="btn waves-effect waves-light">
+          Login
+        </button>
+      </form>
+
+      <!-- Google Login Button -->
+      <div id="googleLog" class="row">
+        <a href="/auth/google" id="google-login-btn" class="google-btn">
+          <i class="fab fa-google"></i> Sign in with Google
+        </a>
+      </div>
+
+      <div class="regButtonDiv row">
+        <p>Don't have an account?</p>
+        <button id="showRegister" class="btn">Register</button>
+      </div>
+
+      <!-- Registration Section -->
+      <div id="registerSection" style="display: none">
+        <h1 id="registerText">Register</h1>
+        <form id="registerForm" class="form-group">
+          <div class="input-field">
+            <label for="reg-username" id="loginLabel">Username</label>
+            <input type="text" id="reg-username" name="username" required />
+          </div>
+          <div class="input-field">
+            <label for="reg-password" id="loginLabel">Password</label>
+            <input type="password" id="reg-password" name="password" required />
+          </div>
+          <!-- New: Account Type selection (removed "required") -->
+          <div class="input-field">
+            <label for="reg-accountType" id="loginLabel">Account Type</label>
+            <select id="reg-accountType" name="accountType">
+              <option value="" disabled selected>Select Account Type</option>
+              <option value="vendor">Vendor</option>
+              <option value="user">User</option>
+            </select>
+          </div>
+          <!-- New: Service Type input shown only for vendors -->
+          <div class="input-field" id="serviceTypeField" style="display: none">
+            <label for="reg-serviceType" id="loginLabel"
+              >Service Type (if Vendor)</label
+            >
+            <input type="text" id="reg-serviceType" name="serviceType" />
+          </div>
+          <button type="submit" class="btn">Register</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

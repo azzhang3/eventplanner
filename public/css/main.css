@@ -1,0 +1,28 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+#loginSection,
+#registerSection {
+  margin: auto;
+  width: 300px;
+}
+
+#dashboard {
+  margin: auto;
+  width: 80%;
+}
+
+.btn {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #2980b9;
+}
