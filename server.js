@@ -4,12 +4,12 @@ const session = require("express-session");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const passport = require("passport");
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const LocalStrategy = require("passport-local").Strategy;
 
 const app = express();
 const port = 3000;
 
-// Set a global Content Security Policy header for all responses
+// Global Content Security Policy header
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
@@ -22,17 +22,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect to MongoDB
+// Connect to MongoDB (replace with your connection string)
 mongoose.connect(
   "mongodb+srv://azzhang3:Password123456789.@cluster0.2lt6b.mongodb.net/test",
   { useNewUrlParser: true, useUnifiedTopology: true }
 );
 
 // --- User Schema ---
-// For vendors, extra information is stored in vendorInfo.
+// Vendors have extra information stored in vendorInfo.
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
-  googleId: { type: String, unique: true, sparse: true },
+  googleId: { type: String, unique: true, sparse: true }, // Unused now.
   password: {
     type: String,
     required: function () {
@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", userSchema);
 
-// --- Event Schema --- (unchanged)
+// --- Event Schema (unchanged) ---
 const eventSchema = new mongoose.Schema({
   creationDate: { type: Date, default: Date.now },
   eventDate: { type: Date, required: true },
@@ -75,12 +75,12 @@ const Event = mongoose.model("Event", eventSchema);
 // --- Reservation Schema ---
 // Stores separate date and time fields.
 // "name" is the reservation holder's full name,
-// "user" stores the username of the user who created the reservation,
-// "vendor" should match the vendor's username.
+// "user" stores the username of the user who made it,
+// "vendor" must match the vendor's username.
 const reservationSchema = new mongoose.Schema({
   name: { type: String, required: true },
   date: { type: Date, required: true },
-  time: { type: String, required: true }, // Expecting format "HH:MM"
+  time: { type: String, required: true }, // Format "HH:MM"
   location: { type: String, required: true },
   details: { type: String },
   vendor: { type: String, required: true },
@@ -107,7 +107,23 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Passport serialize/deserialize
+// Configure Passport Local Strategy
+passport.use(
+  new LocalStrategy(async (username, password, done) => {
+    try {
+      const user = await User.findOne({ username });
+      if (!user)
+        return done(null, false, { message: "Invalid username or password" });
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch)
+        return done(null, false, { message: "Invalid username or password" });
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  })
+);
+
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
@@ -120,39 +136,6 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// --- Passport Google OAuth Strategy ---
-// Default accountType is "user" for Google sign-ins.
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID:
-        "521313058439-ufmg5r2raagp9drd5515lauicgs0j24k.apps.googleusercontent.com",
-      clientSecret: "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",
-      callbackURL: "http://localhost:3000/auth/google/callback",
-    },
-    (accessToken, refreshToken, profile, done) => {
-      const email =
-        profile.emails && profile.emails.length > 0
-          ? profile.emails[0].value
-          : null;
-      User.findOne({ googleId: profile.id }).then((existingUser) => {
-        if (existingUser) return done(null, existingUser);
-        else {
-          new User({
-            username: profile.displayName,
-            googleId: profile.id,
-            profilePhoto: profile.photos[0].value,
-            email: email,
-            accountType: "user",
-          })
-            .save()
-            .then((newUser) => done(null, newUser));
-        }
-      });
-    }
-  )
-);
-
 // Authentication middleware
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) return next();
@@ -160,8 +143,7 @@ function isLoggedIn(req, res, next) {
 }
 
 // --- Routes ---
-
-// Serve login page
+// Serve index.html for login/signup.
 app.get("/", (req, res) => {
   if (req.isAuthenticated()) {
     return req.user.accountType === "vendor"
@@ -171,7 +153,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Home pages
+// Home pages for users and vendors.
 app.get("/home-user", isLoggedIn, (req, res) => {
   if (req.user.accountType !== "user") return res.redirect("/home-vendor");
   res.sendFile(path.join(__dirname, "public", "home-user.html"));
@@ -181,25 +163,86 @@ app.get("/home-vendor", isLoggedIn, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home-vendor.html"));
 });
 
-// Google Auth Routes
-app.get(
-  "/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-    prompt: "select_account",
-  })
-);
-app.get(
-  "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/" }),
-  (req, res) => {
-    res.redirect(
-      req.user.accountType === "vendor" ? "/home-vendor" : "/home-user"
-    );
-  }
-);
+// Local authentication endpoints.
+app.post("/login", passport.authenticate("local"), (req, res) => {
+  const redirectUrl =
+    req.user.accountType === "vendor" ? "/home-vendor" : "/home-user";
+  res.json({ redirectUrl });
+});
 
-// Vendor search endpoint
+app.post("/register", async (req, res) => {
+  const { username, password, accountType } = req.body;
+  console.log("Registration payload:", req.body);
+  try {
+    if (!accountType || (accountType !== "vendor" && accountType !== "user")) {
+      return res.status(400).json({ message: "Invalid account type." });
+    }
+    let vendorInfo = undefined;
+    if (accountType === "vendor") {
+      const {
+        service,
+        companyName,
+        averageCost,
+        typeOfCuisine,
+        description,
+        tags,
+      } = req.body;
+      if (!service || !companyName || !averageCost) {
+        return res.status(400).json({
+          message:
+            "Service, Company Name, and Average Cost are required for vendor accounts.",
+        });
+      }
+      if (
+        service === "Food" &&
+        (!typeOfCuisine || typeOfCuisine.trim() === "")
+      ) {
+        return res
+          .status(400)
+          .json({ message: "Type of Cuisine is required for Food vendors." });
+      }
+      let tagsArray = [];
+      if (tags && typeof tags === "string") {
+        tagsArray = tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t);
+      }
+      vendorInfo = {
+        service,
+        companyName,
+        averageCost,
+        typeOfCuisine: service === "Food" ? typeOfCuisine : undefined,
+        description,
+        tags: tagsArray,
+      };
+    }
+    const existingUser = await User.findOne({ username });
+    if (existingUser)
+      return res.status(400).json({ message: "Username is already taken" });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      username,
+      password: hashedPassword,
+      accountType,
+      vendorInfo,
+    });
+    await newUser.save();
+    res.status(201).json({ message: "User created successfully!" });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
+app.get("/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    res.redirect("/");
+  });
+});
+
+// Vendor search endpoint.
 app.get("/vendors", isLoggedIn, async (req, res) => {
   try {
     const service = req.query.service;
@@ -233,7 +276,7 @@ app.post("/reservations", isLoggedIn, async (req, res) => {
     const newReservation = new Reservation({
       name,
       date: parsedDate,
-      time, // Expecting "HH:MM" from dropdown.
+      time,
       location,
       details,
       vendor,
@@ -332,102 +375,6 @@ app.get("/user-reservations", isLoggedIn, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "An error occurred", error });
   }
-});
-
-// Registration endpoint updated with vendor validation.
-app.post("/register", async (req, res) => {
-  const { username, password, accountType } = req.body;
-  console.log("Registration payload:", req.body);
-  try {
-    if (!accountType || (accountType !== "vendor" && accountType !== "user")) {
-      return res.status(400).json({ message: "Invalid account type." });
-    }
-    let vendorInfo = undefined;
-    if (accountType === "vendor") {
-      const {
-        service,
-        companyName,
-        averageCost,
-        typeOfCuisine,
-        description,
-        tags,
-      } = req.body;
-      if (!service || !companyName || !averageCost) {
-        return res.status(400).json({
-          message:
-            "Service, Company Name, and Average Cost are required for vendor accounts.",
-        });
-      }
-      if (
-        service === "Food" &&
-        (!typeOfCuisine || typeOfCuisine.trim() === "")
-      ) {
-        return res
-          .status(400)
-          .json({ message: "Type of Cuisine is required for Food vendors." });
-      }
-      let tagsArray = [];
-      if (tags && typeof tags === "string") {
-        tagsArray = tags
-          .split(",")
-          .map((t) => t.trim())
-          .filter((t) => t);
-      }
-      vendorInfo = {
-        service,
-        companyName,
-        averageCost,
-        typeOfCuisine: service === "Food" ? typeOfCuisine : undefined,
-        description,
-        tags: tagsArray,
-      };
-    }
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: "Username is already taken" });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      username,
-      password: hashedPassword,
-      accountType,
-      vendorInfo: vendorInfo,
-    });
-    await newUser.save();
-    res.status(201).json({ message: "User created successfully!" });
-  } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({ message: "An error occurred", error });
-  }
-});
-
-// Updated login endpoint: Return JSON with redirectUrl.
-app.post("/login", async (req, res, next) => {
-  const { username, password } = req.body;
-  try {
-    const user = await User.findOne({ username });
-    if (!user)
-      return res.status(400).json({ message: "Invalid username or password" });
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Invalid username or password" });
-    req.login(user, function (err) {
-      if (err) return next(err);
-      const redirectUrl =
-        user.accountType === "vendor" ? "/home-vendor" : "/home-user";
-      return res.json({ redirectUrl });
-    });
-  } catch (error) {
-    res.status(500).json({ message: "An error occurred", error });
-  }
-});
-
-// Logout route
-app.get("/logout", (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.redirect("/");
-  });
 });
 
 app.listen(port, () => {

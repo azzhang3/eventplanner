@@ -10,105 +10,31 @@
       content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:;"
     />
     <link rel="stylesheet" href="css/main.css" />
-    <!-- Materialize CSS -->
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
       rel="stylesheet"
     />
   </head>
-  <body>
-    <div class="container">
-      <h1>Welcome, Vendor!</h1>
-      <p>This is your vendor dashboard for managing event services.</p>
-      <a href="/logout" class="btn">Logout</a>
+  <body id="home-vendor">
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Party Planner</a>
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+          <li><a href="/logout" class="btn">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
 
-      <h3>Your Reservations</h3>
+    <div class="container" style="margin-top: 30px">
+      <h4>Vendor Dashboard</h4>
+      <h5>Your Reservations</h5>
       <div id="reservationList">
-        <!-- Reservations will be populated here -->
+        <!-- Reservations will be loaded here -->
       </div>
     </div>
 
-    <!-- Materialize JS -->
+    <!-- Include Materialize JS and external home.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", async () => {
-        async function loadReservations() {
-          try {
-            const response = await fetch("/reservations");
-            const reservations = await response.json();
-            console.log("Fetched reservations:", reservations); // Debug log
-
-            const reservationListDiv =
-              document.getElementById("reservationList");
-            if (reservations.length === 0) {
-              reservationListDiv.innerHTML = "<p>No reservations yet.</p>";
-              return;
-            }
-            reservationListDiv.innerHTML = reservations
-              .map(
-                (r) => `
-              <div class="card">
-                <div class="card-content">
-                  <span class="card-title">${r.name}</span>
-                  <p>Date: ${new Date(r.date).toLocaleDateString()}</p>
-                  <p>Time: ${r.time}</p>
-                  <p>Location: ${r.location}</p>
-                  <p>Details: ${r.details || ""}</p>
-                  <p>Status: ${r.status}</p>
-                  ${
-                    r.status === "pending"
-                      ? `
-                    <button class="btn accept-btn" data-id="${r._id}">Accept</button>
-                    <button class="btn decline-btn" data-id="${r._id}">Decline</button>
-                  `
-                      : ""
-                  }
-                </div>
-              </div>
-            `
-              )
-              .join("");
-
-            document.querySelectorAll(".accept-btn").forEach((btn) => {
-              btn.addEventListener("click", async () => {
-                const id = btn.getAttribute("data-id");
-                try {
-                  const res = await fetch(`/reservations/${id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ status: "accepted" }),
-                  });
-                  const result = await res.json();
-                  alert(result.message);
-                  loadReservations();
-                } catch (err) {
-                  console.error("Error updating reservation:", err);
-                }
-              });
-            });
-            document.querySelectorAll(".decline-btn").forEach((btn) => {
-              btn.addEventListener("click", async () => {
-                const id = btn.getAttribute("data-id");
-                try {
-                  const res = await fetch(`/reservations/${id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ status: "declined" }),
-                  });
-                  const result = await res.json();
-                  alert(result.message);
-                  loadReservations();
-                } catch (err) {
-                  console.error("Error updating reservation:", err);
-                }
-              });
-            });
-          } catch (error) {
-            console.error("Error fetching reservations:", error);
-          }
-        }
-        loadReservations();
-      });
-    </script>
+    <script src="js/home.js"></script>
   </body>
 </html>

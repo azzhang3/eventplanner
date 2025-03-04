@@ -12,19 +12,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const body = document.body;
 
   // Check localStorage for dark mode preference
-  if (localStorage.getItem("darkMode") === "enabled") {
-    body.classList.add("dark-mode");
-    darkModeToggle.checked = true;
-  }
-  darkModeToggle.addEventListener("change", function () {
-    if (darkModeToggle.checked) {
-      body.classList.add("dark-mode");
-      localStorage.setItem("darkMode", "enabled");
-    } else {
-      body.classList.remove("dark-mode");
-      localStorage.setItem("darkMode", "disabled");
-    }
-  });
+  // if (localStorage.getItem("darkMode") === "enabled") {
+  //   body.classList.add("dark-mode");
+  //   darkModeToggle.checked = true;
+  // }
+  // darkModeToggle.addEventListener("change", function () {
+  //   if (darkModeToggle.checked) {
+  //     body.classList.add("dark-mode");
+  //     localStorage.setItem("darkMode", "enabled");
+  //   } else {
+  //     body.classList.remove("dark-mode");
+  //     localStorage.setItem("darkMode", "disabled");
+  //   }
+  // });
 
   // Toggle registration form display
   showRegisterBtn.addEventListener("click", (e) => {
@@ -80,11 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Handle Google login button
-  if (googleLoginBtn) {
-    googleLoginBtn.addEventListener("click", () => {
-      window.location.href = "/auth/google";
-    });
-  }
+  // if (googleLoginBtn) {
+  //   googleLoginBtn.addEventListener("click", () => {
+  //     window.location.href = "/auth/google";
+  //   });
+  // }
 
   // Handle registration
   registerForm.addEventListener("submit", (e) => {
