@@ -9,7 +9,6 @@
       content="Efficiently manage your events with Party Planner. Log in to plan parties, track details, and stay organized."
     />
     <script src="js/login.js"></script>
-    <!-- Keep this one -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -93,7 +92,7 @@
             <label for="reg-password" id="loginLabel">Password</label>
             <input type="password" id="reg-password" name="password" required />
           </div>
-          <!-- New: Account Type selection (removed "required") -->
+          <!-- Account Type Selection -->
           <div class="input-field">
             <label for="reg-accountType" id="loginLabel">Account Type</label>
             <select id="reg-accountType" name="accountType">
@@ -102,12 +101,81 @@
               <option value="user">User</option>
             </select>
           </div>
-          <!-- New: Service Type input shown only for vendors -->
-          <div class="input-field" id="serviceTypeField" style="display: none">
-            <label for="reg-serviceType" id="loginLabel"
-              >Service Type (if Vendor)</label
+          <!-- Vendor Extra Fields: hidden unless Vendor is selected -->
+          <div id="vendorExtraFields" style="display: none">
+            <!-- Service Dropdown -->
+            <div class="input-field">
+              <label for="vendor-service" id="loginLabel">Service</label>
+              <select id="vendor-service" name="vendor-service">
+                <option value="" disabled selected>Select Service</option>
+                <option value="Food">Food</option>
+                <option value="Music">Music</option>
+                <option value="Photos">Photos</option>
+                <option value="Videos">Videos</option>
+                <option value="Decorations">Decorations</option>
+              </select>
+            </div>
+            <!-- Company Name -->
+            <div class="input-field">
+              <label for="vendor-companyName" id="loginLabel"
+                >Company Name</label
+              >
+              <input
+                type="text"
+                id="vendor-companyName"
+                name="vendor-companyName"
+              />
+            </div>
+            <!-- Average Cost -->
+            <div class="input-field">
+              <label for="vendor-averageCost" id="loginLabel"
+                >Average Cost</label
+              >
+              <select id="vendor-averageCost" name="vendor-averageCost">
+                <option value="" disabled selected>Select Average Cost</option>
+                <option value="$">$</option>
+                <option value="$$">$$</option>
+                <option value="$$$">$$$</option>
+              </select>
+            </div>
+            <!-- If Service is Food: Type of Cuisine -->
+            <div
+              class="input-field"
+              id="foodCuisineField"
+              style="display: none"
             >
-            <input type="text" id="reg-serviceType" name="serviceType" />
+              <label for="vendor-typeOfCuisine" id="loginLabel"
+                >Type of Cuisine</label
+              >
+              <input
+                type="text"
+                id="vendor-typeOfCuisine"
+                name="vendor-typeOfCuisine"
+              />
+            </div>
+            <!-- Description -->
+            <div class="input-field">
+              <label for="vendor-description" id="loginLabel"
+                >Description</label
+              >
+              <textarea
+                id="vendor-description"
+                name="vendor-description"
+                class="materialize-textarea"
+              ></textarea>
+            </div>
+            <!-- Tags -->
+            <div class="input-field">
+              <label for="vendor-tags" id="loginLabel"
+                >Tags (comma-separated)</label
+              >
+              <input
+                type="text"
+                id="vendor-tags"
+                name="vendor-tags"
+                placeholder="e.g., wedding, corporate"
+              />
+            </div>
           </div>
           <button type="submit" class="btn">Register</button>
         </form>
