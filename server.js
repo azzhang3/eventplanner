@@ -22,7 +22,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect to MongoDB (replace with your connection string)
+// Connect to MongoDB
 mongoose.connect(
   "mongodb+srv://azzhang3:Password123456789.@cluster0.2lt6b.mongodb.net/test",
   { useNewUrlParser: true, useUnifiedTopology: true }
