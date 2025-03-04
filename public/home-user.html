@@ -1,19 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Party Planner - Home</title>
+    <title>Party Planner - Home (User)</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- CSP meta tag to allow inline styles and external CSS from approved sources -->
+    <!-- CSP meta tag -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline';"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:;"
+    />
+    <!-- Materialize CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+      rel="stylesheet"
     />
     <link rel="stylesheet" href="css/main.css" />
   </head>
-  <body>
-    <h1>Welcome, User!</h1>
-    <p>This is your home page for planning parties.</p>
-    <a href="/logout" class="btn">Logout</a>
+  <body id="home-user">
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Party Planner</a>
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+          <li><a href="/logout" class="btn">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container" style="margin-top: 30px">
+      <h4>Welcome, User!</h4>
+      <div class="row">
+        <!-- Vendor Search Section -->
+        <div class="col s12 m6">
+          <h5>Search for Vendors</h5>
+          <form id="vendorSearchForm">
+            <div class="input-field">
+              <select id="searchService">
+                <option value="" disabled selected>Select Service</option>
+                <option value="Food">Food</option>
+                <option value="Music">Music</option>
+                <option value="Photos">Photos</option>
+                <option value="Videos">Videos</option>
+                <option value="Decorations">Decorations</option>
+              </select>
+              <label>Service</label>
+            </div>
+            <button type="submit" class="btn">Search</button>
+          </form>
+          <div id="vendorResults"></div>
+        </div>
+        <!-- Reservation History Section -->
+        <div class="col s12 m6">
+          <h5>Your Reservation History</h5>
+          <div id="reservationHistory"></div>
+        </div>
+      </div>
+      <!-- Hidden Reservation Form -->
+      <div
+        id="reservationFormContainer"
+        style="display: none; margin-top: 20px"
+      >
+        <div class="card">
+          <div class="card-content">
+            <h5>Make a Reservation</h5>
+            <form id="reservationForm">
+              <div class="input-field">
+                <input type="text" id="reservationName" required />
+                <label for="reservationName">Name (First and Last)</label>
+              </div>
+              <div class="input-field">
+                <input type="date" id="reservationDate" required />
+                <label for="reservationDate">Date</label>
+              </div>
+              <div class="input-field">
+                <select id="reservationTime">
+                  <option value="" disabled selected>Select Time</option>
+                  <!-- Time options -->
+                  <option value="09:00">09:00</option>
+                  <option value="09:30">09:30</option>
+                  <option value="10:00">10:00</option>
+                  <option value="10:30">10:30</option>
+                  <option value="11:00">11:00</option>
+                  <option value="11:30">11:30</option>
+                  <option value="12:00">12:00</option>
+                  <option value="12:30">12:30</option>
+                  <option value="13:00">13:00</option>
+                  <option value="13:30">13:30</option>
+                  <option value="14:00">14:00</option>
+                  <option value="14:30">14:30</option>
+                  <option value="15:00">15:00</option>
+                  <option value="15:30">15:30</option>
+                  <option value="16:00">16:00</option>
+                  <option value="16:30">16:30</option>
+                  <option value="17:00">17:00</option>
+                  <option value="17:30">17:30</option>
+                  <option value="18:00">18:00</option>
+                  <option value="18:30">18:30</option>
+                  <option value="19:00">19:00</option>
+                  <option value="19:30">19:30</option>
+                  <option value="20:00">20:00</option>
+                  <option value="20:30">20:30</option>
+                  <option value="21:00">21:00</option>
+                  <option value="21:30">21:30</option>
+                  <option value="22:00">22:00</option>
+                </select>
+                <label for="reservationTime">Time</label>
+              </div>
+              <div class="input-field">
+                <input type="text" id="reservationLocation" required />
+                <label for="reservationLocation">Location</label>
+              </div>
+              <div class="input-field">
+                <textarea
+                  id="reservationDetails"
+                  class="materialize-textarea"
+                ></textarea>
+                <label for="reservationDetails">Additional Details</label>
+              </div>
+              <!-- Hidden vendor field -->
+              <input type="hidden" id="reservationVendor" />
+              <button type="submit" class="btn">Submit Reservation</button>
+              <button type="button" id="cancelReservation" class="btn red">
+                Cancel
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include Materialize JS and external home.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="js/home.js"></script>
   </body>
 </html>

@@ -1,117 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Party Planner - Login</title>
+    <title>Party Planner - Login & Registration</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
       content="Efficiently manage your events with Party Planner. Log in to plan parties, track details, and stay organized."
     />
-    <script src="js/login.js"></script>
-    <!-- Keep this one -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto+Slab:wght@100..900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;1,400&family=Roboto+Slab:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-    />
-    <!-- Import Materialize CSS -->
+    <!-- Materialize CSS -->
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
       rel="stylesheet"
     />
-    <!-- Import Materialize JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <link rel="stylesheet" href="css/main.css" />
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
   </head>
   <body>
-    <div id="loginSection">
-      <!-- Dark Mode Toggle Switch -->
-      <div class="switch" id="loginDark">
-        <label id="dark-modeLabel">
-          Light
-          <input type="checkbox" id="darkModeToggle" />
-          <span class="lever"></span>
-          Dark
-        </label>
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Party Planner</a>
       </div>
-      <h1 id="title">Party Planner</h1>
-      <h1 id="loginText">Login</h1>
-      <form id="loginForm" class="input-field">
-        <div class="input-field">
-          <label for="login-username" id="loginLabel">Username</label>
-          <input
-            type="text"
-            id="login-username"
-            name="username"
-            class="validate"
-            required
-          />
+    </nav>
+
+    <div class="container" style="margin-top: 50px">
+      <!-- Login Section -->
+      <div id="loginSection">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title center-align">Login</span>
+            <form id="loginForm">
+              <div class="input-field">
+                <input type="text" id="login-username" required />
+                <label for="login-username">Username</label>
+              </div>
+              <div class="input-field">
+                <input type="password" id="login-password" required />
+                <label for="login-password">Password</label>
+              </div>
+              <div class="center-align">
+                <button type="submit" class="btn">Login</button>
+              </div>
+            </form>
+          </div>
+          <div class="card-action center-align">
+            <p>
+              Don't have an account?
+              <a href="#" id="showRegister">Register</a>
+            </p>
+          </div>
         </div>
-        <div class="input-field">
-          <label for="login-password" id="loginLabel">Password</label>
-          <input
-            type="password"
-            id="login-password"
-            name="password"
-            class="validate"
-            required
-          />
-        </div>
-        <button type="submit" class="btn waves-effect waves-light">
-          Login
-        </button>
-      </form>
-
-      <!-- Google Login Button -->
-      <div id="googleLog" class="row">
-        <a href="/auth/google" id="google-login-btn" class="google-btn">
-          <i class="fab fa-google"></i> Sign in with Google
-        </a>
       </div>
 
-      <div class="regButtonDiv row">
-        <p>Don't have an account?</p>
-        <button id="showRegister" class="btn">Register</button>
-      </div>
-
-      <!-- Registration Section -->
+      <!-- Registration Section (Hidden by default) -->
       <div id="registerSection" style="display: none">
-        <h1 id="registerText">Register</h1>
-        <form id="registerForm" class="form-group">
-          <div class="input-field">
-            <label for="reg-username" id="loginLabel">Username</label>
-            <input type="text" id="reg-username" name="username" required />
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title center-align">Register</span>
+            <form id="registerForm">
+              <div class="input-field">
+                <input type="text" id="reg-username" required />
+                <label for="reg-username">Username</label>
+              </div>
+              <div class="input-field">
+                <input type="password" id="reg-password" required />
+                <label for="reg-password">Password</label>
+              </div>
+              <div class="input-field">
+                <select id="reg-accountType" required>
+                  <option value="" disabled selected>
+                    Select Account Type
+                  </option>
+                  <option value="vendor">Vendor</option>
+                  <option value="user">User</option>
+                </select>
+                <label>Account Type</label>
+              </div>
+              <!-- Vendor Extra Fields (hidden unless Vendor is selected) -->
+              <div id="vendorExtraFields" style="display: none">
+                <div class="input-field">
+                  <select id="vendor-service">
+                    <option value="" disabled selected>Select Service</option>
+                    <option value="Food">Food</option>
+                    <option value="Music">Music</option>
+                    <option value="Photos">Photos</option>
+                    <option value="Videos">Videos</option>
+                    <option value="Decorations">Decorations</option>
+                  </select>
+                  <label>Service</label>
+                </div>
+                <div class="input-field">
+                  <input type="text" id="vendor-companyName" />
+                  <label for="vendor-companyName">Company Name</label>
+                </div>
+                <div class="input-field">
+                  <select id="vendor-averageCost">
+                    <option value="" disabled selected>
+                      Select Average Cost
+                    </option>
+                    <option value="$">$</option>
+                    <option value="$$">$$</option>
+                    <option value="$$$">$$$</option>
+                  </select>
+                  <label>Average Cost</label>
+                </div>
+                <div
+                  class="input-field"
+                  id="foodCuisineField"
+                  style="display: none"
+                >
+                  <input type="text" id="vendor-typeOfCuisine" />
+                  <label for="vendor-typeOfCuisine">Type of Cuisine</label>
+                </div>
+                <div class="input-field">
+                  <textarea
+                    id="vendor-description"
+                    class="materialize-textarea"
+                  ></textarea>
+                  <label for="vendor-description">Description</label>
+                </div>
+                <div class="input-field">
+                  <input
+                    type="text"
+                    id="vendor-tags"
+                    placeholder="e.g., wedding, corporate"
+                  />
+                  <label for="vendor-tags">Tags (comma-separated)</label>
+                </div>
+              </div>
+              <div class="center-align">
+                <button type="submit" class="btn">Register</button>
+              </div>
+            </form>
           </div>
-          <div class="input-field">
-            <label for="reg-password" id="loginLabel">Password</label>
-            <input type="password" id="reg-password" name="password" required />
+          <div class="card-action center-align">
+            <p>
+              Already have an account?
+              <a href="#" id="showLogin">Login</a>
+            </p>
           </div>
-          <!-- New: Account Type selection (removed "required") -->
-          <div class="input-field">
-            <label for="reg-accountType" id="loginLabel">Account Type</label>
-            <select id="reg-accountType" name="accountType">
-              <option value="" disabled selected>Select Account Type</option>
-              <option value="vendor">Vendor</option>
-              <option value="user">User</option>
-            </select>
-          </div>
-          <!-- New: Service Type input shown only for vendors -->
-          <div class="input-field" id="serviceTypeField" style="display: none">
-            <label for="reg-serviceType" id="loginLabel"
-              >Service Type (if Vendor)</label
-            >
-            <input type="text" id="reg-serviceType" name="serviceType" />
-          </div>
-          <button type="submit" class="btn">Register</button>
-        </form>
+        </div>
       </div>
     </div>
+
+    <!-- Materialize JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- External login.js handles form toggling and initialization -->
+    <script src="js/login.js"></script>
   </body>
 </html>

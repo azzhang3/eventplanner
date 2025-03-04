@@ -4,16 +4,37 @@
     <title>Party Planner - Vendor Home</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- CSP meta tag to allow inline styles and external CSS from approved sources -->
+    <!-- CSP meta tag -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline';"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:;"
     />
     <link rel="stylesheet" href="css/main.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+      rel="stylesheet"
+    />
   </head>
-  <body>
-    <h1>Welcome, Vendor!</h1>
-    <p>This is your vendor dashboard for managing event services.</p>
-    <a href="/logout" class="btn">Logout</a>
+  <body id="home-vendor">
+    <nav>
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Party Planner</a>
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+          <li><a href="/logout" class="btn">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container" style="margin-top: 30px">
+      <h4>Vendor Dashboard</h4>
+      <h5>Your Reservations</h5>
+      <div id="reservationList">
+        <!-- Reservations will be loaded here -->
+      </div>
+    </div>
+
+    <!-- Include Materialize JS and external home.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="js/home.js"></script>
   </body>
 </html>
