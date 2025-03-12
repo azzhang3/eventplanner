@@ -1,13 +1,29 @@
+/* Global Styles */
 body {
-  font-family: Arial, sans-serif;
+  font-family: "Roboto", Arial, sans-serif;
   margin: 0;
-  padding: 20px;
+  padding: 0, 20px, 20px, 20px;
+  background-color: #f0f2f5;
 }
 
+/* Navigation */
+.nav-wrapper {
+  background-color: #2c3e50;
+}
+
+.nav-wrapper a.brand-logo {
+  font-family: "Roboto Slab", serif;
+  font-size: 1.5em;
+  color: #ecf0f1;
+}
+
+/* Sections */
 #loginSection,
 #registerSection {
   margin: auto;
-  width: 300px;
+  width: 500px;
+  padding: 20px;
+  max-width: 90%;
 }
 
 #dashboard {
@@ -15,14 +31,88 @@ body {
   width: 80%;
 }
 
+/* Cards */
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card .card-title {
+  font-size: 1.3em;
+  margin-bottom: 10px;
+  color: #34495e;
+}
+
+/* Buttons */
 .btn {
   background-color: #3498db;
   color: white;
   border: none;
-  padding: 10px;
+  padding: 10px 20px;
+  border-radius: 4px;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: inline-block;
+  text-align: center;
+  line-height: 1.5;
 }
 
 .btn:hover {
   background-color: #2980b9;
+  transform: scale(1.03);
+}
+
+/* Input Fields */
+.input-field input,
+.input-field textarea,
+.input-field select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
+  margin-bottom: 15px;
+}
+
+.input-field input:focus,
+.input-field textarea:focus,
+.input-field select:focus {
+  border-color: #3498db;
+}
+
+/* Modal Styling */
+.modal {
+  border-radius: 8px;
+}
+
+/* Additional Customizations */
+.card-action a {
+  color: #3498db;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.card-action a:hover {
+  text-decoration: underline;
+}
+
+#showLogin,
+#showRegister {
+  color: #3498db;
+  cursor: pointer;
+  display: block;
+  text-align: center;
+  margin: 0;
+}
+
+label[for="vendor-description"] {
+  margin-left: 10px;
+}
+
+label[for="reviewText"] {
+  margin-left: 10px;
 }

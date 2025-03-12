@@ -18,13 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
     return starsHTML;
   }
 
-  // Determine page by body id.
+  // Determine current page by body id.
   const pageId = document.body.id;
   if (pageId === "home-user") {
     // ------------------
     // User Home Page Logic
     // ------------------
-    // Vendor search functionality
     const vendorSearchForm = document.getElementById("vendorSearchForm");
     vendorSearchForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -81,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Reservation form submission
     const reservationForm = document.getElementById("reservationForm");
     reservationForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -188,6 +186,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     loadReservationHistory();
   } else if (pageId === "home-vendor") {
+    // ------------------
+    // Vendor Home Page Logic
+    // ------------------
     async function loadReservations() {
       try {
         const response = await fetch("/reservations");
@@ -219,9 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     : ""
                 }
                 <button class="btn chat-btn" data-id="${r._id}">Chat</button>
-                <button class="btn review-btn" data-vendor="${
-                  r.vendor
-                }">Leave Review</button>
               </div>
             </div>
           `
@@ -266,16 +264,45 @@ document.addEventListener("DOMContentLoaded", () => {
             openChat(btn.getAttribute("data-id"));
           });
         });
-        document.querySelectorAll(".review-btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            openReview(btn.getAttribute("data-vendor"));
-          });
-        });
       } catch (error) {
         console.error("Error fetching reservations:", error);
       }
     }
     loadReservations();
+
+    // --- Load Vendor Reviews ---
+    async function loadVendorReviews() {
+      try {
+        // First, get the current user's details
+        const userRes = await fetch("/current-user");
+        const user = await userRes.json();
+        const vendorUsername = user.username;
+        const reviewsRes = await fetch(
+          `/reviews?vendor=${encodeURIComponent(vendorUsername)}`
+        );
+        const reviews = await reviewsRes.json();
+        const reviewsDiv = document.getElementById("vendorReviews");
+        if (reviews.length === 0) {
+          reviewsDiv.innerHTML = "<p>No reviews yet.</p>";
+          return;
+        }
+        reviewsDiv.innerHTML = reviews
+          .map(
+            (r) => `
+            <div class="card-panel">
+              <div class="review-rating">${renderStars(r.rating)}</div>
+              <p><strong>${r.user}</strong></p>
+              <p>${r.text || ""}</p>
+              <p><small>${new Date(r.timestamp).toLocaleString()}</small></p>
+            </div>
+          `
+          )
+          .join("");
+      } catch (error) {
+        console.error("Error loading vendor reviews:", error);
+      }
+    }
+    loadVendorReviews();
   }
 
   // Chat functionality
@@ -328,7 +355,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // --- Review Functionality ---
+  // --- Review Functionality for Users ---
   function openReview(vendorUsername) {
     currentReviewVendor = vendorUsername;
     document.getElementById("reviewVendor").value = vendorUsername;
@@ -384,7 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-  // Optional: Refresh chat messages every 5 seconds
+  // Refresh chat messages every 5 seconds
   setInterval(() => {
     if (currentReservationId) {
       loadChatMessages();

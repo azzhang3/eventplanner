@@ -51,8 +51,8 @@ document.addEventListener("DOMContentLoaded", () => {
           el.disabled = true;
         });
       displayNameField.style.display = "block";
-      regDisplayName.disabled = false; // Enable for user accounts
-      regDisplayName.required = true; // Mark as required
+      regDisplayName.disabled = false;
+      regDisplayName.required = true;
     } else {
       vendorExtraFields.style.display = "none";
       vendorExtraFields

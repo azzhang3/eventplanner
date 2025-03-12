@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const userType = "consumer"; // Replace this with a backend check for account type
+  const userType = "consumer";
 
   if (userType === "consumer") {
     document.getElementById("consumer-section").style.display = "block";

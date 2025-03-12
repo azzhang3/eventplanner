@@ -29,12 +29,11 @@ mongoose.connect(
 );
 
 // --- User Schema ---
-// For non‑vendor (user) accounts, we now require a displayName.
+// For user accounts, displayName is required.
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
   accountType: { type: String, enum: ["vendor", "user"], required: true },
-  // displayName is required for user accounts.
   displayName: {
     type: String,
     required: function () {
@@ -89,19 +88,17 @@ const reservationSchema = new mongoose.Schema({
 const Reservation = mongoose.model("Reservation", reservationSchema);
 
 // --- Review Schema ---
-// A review left by a user for a vendor. We restrict one review per vendor per user.
+// Each user can leave only one review per vendor.
 const reviewSchema = new mongoose.Schema({
   vendor: { type: String, required: true },
-  // Store the user's displayName so that if multiple users use the same displayName,
-  // uniqueness is enforced per account (it’s assumed displayName is unique for each account).
-  user: { type: String, required: true },
+  user: { type: String, required: true }, // stores the user's displayName
   rating: { type: Number, min: 1, max: 5, required: true },
   text: { type: String },
   timestamp: { type: Date, default: Date.now },
 });
 const Review = mongoose.model("Review", reviewSchema);
 
-// --- Message Schema --- (Chat functionality)
+// --- Message Schema ---
 const messageSchema = new mongoose.Schema({
   reservation: {
     type: mongoose.Schema.Types.ObjectId,
@@ -473,7 +470,6 @@ app.get("/messages/:reservationId", isLoggedIn, async (req, res) => {
 });
 
 // --- Review Endpoints ---
-// Allow users to leave only one review per vendor.
 app.post("/reviews", isLoggedIn, async (req, res) => {
   if (req.user.accountType !== "user") {
     return res.status(403).json({ message: "Only users can leave reviews." });
@@ -486,7 +482,6 @@ app.post("/reviews", isLoggedIn, async (req, res) => {
     return res.status(400).json({ message: "Rating must be between 1 and 5." });
   }
   try {
-    // Ensure a review from this user (based on displayName) for this vendor doesn't already exist.
     const existingReview = await Review.findOne({
       vendor,
       user: req.user.displayName,
@@ -510,7 +505,6 @@ app.post("/reviews", isLoggedIn, async (req, res) => {
   }
 });
 
-// Get all reviews for a vendor.
 app.get("/reviews", isLoggedIn, async (req, res) => {
   const vendor = req.query.vendor;
   if (!vendor) {
@@ -522,6 +516,12 @@ app.get("/reviews", isLoggedIn, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "An error occurred", error });
   }
+});
+
+// --- New: Current User Endpoint ---
+// This endpoint returns the currently logged-in user's info.
+app.get("/current-user", isLoggedIn, (req, res) => {
+  res.json(req.user);
 });
 
 app.listen(port, () => {
