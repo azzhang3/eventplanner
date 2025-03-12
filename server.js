@@ -29,19 +29,18 @@ mongoose.connect(
 );
 
 // --- User Schema ---
-// Vendors have extra information stored in vendorInfo.
+// For non‑vendor (user) accounts, we now require a displayName.
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
-  googleId: { type: String, unique: true, sparse: true }, // Unused now.
-  password: {
+  password: { type: String, required: true },
+  accountType: { type: String, enum: ["vendor", "user"], required: true },
+  // displayName is required for user accounts.
+  displayName: {
     type: String,
     required: function () {
-      return !this.googleId;
+      return this.accountType === "user";
     },
   },
-  email: { type: String },
-  profilePhoto: { type: String },
-  accountType: { type: String, enum: ["vendor", "user"], required: true },
   vendorInfo: {
     service: {
       type: String,
@@ -56,7 +55,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model("User", userSchema);
 
-// --- Event Schema (unchanged) ---
+// --- Event Schema ---
 const eventSchema = new mongoose.Schema({
   creationDate: { type: Date, default: Date.now },
   eventDate: { type: Date, required: true },
@@ -73,10 +72,6 @@ const eventSchema = new mongoose.Schema({
 const Event = mongoose.model("Event", eventSchema);
 
 // --- Reservation Schema ---
-// Stores separate date and time fields.
-// "name" is the reservation holder's full name,
-// "user" stores the username of the user who made it,
-// "vendor" must match the vendor's username.
 const reservationSchema = new mongoose.Schema({
   name: { type: String, required: true },
   date: { type: Date, required: true },
@@ -92,6 +87,32 @@ const reservationSchema = new mongoose.Schema({
   },
 });
 const Reservation = mongoose.model("Reservation", reservationSchema);
+
+// --- Review Schema ---
+// A review left by a user for a vendor. We restrict one review per vendor per user.
+const reviewSchema = new mongoose.Schema({
+  vendor: { type: String, required: true },
+  // Store the user's displayName so that if multiple users use the same displayName,
+  // uniqueness is enforced per account (it’s assumed displayName is unique for each account).
+  user: { type: String, required: true },
+  rating: { type: Number, min: 1, max: 5, required: true },
+  text: { type: String },
+  timestamp: { type: Date, default: Date.now },
+});
+const Review = mongoose.model("Review", reviewSchema);
+
+// --- Message Schema --- (Chat functionality)
+const messageSchema = new mongoose.Schema({
+  reservation: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Reservation",
+    required: true,
+  },
+  sender: { type: String, required: true },
+  text: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+});
+const Message = mongoose.model("Message", messageSchema);
 
 // Middleware
 app.use(express.json());
@@ -123,7 +144,6 @@ passport.use(
     }
   })
 );
-
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
@@ -142,8 +162,7 @@ function isLoggedIn(req, res, next) {
   res.redirect("/");
 }
 
-// --- Routes ---
-// Serve index.html for login/signup.
+// Routes
 app.get("/", (req, res) => {
   if (req.isAuthenticated()) {
     return req.user.accountType === "vendor"
@@ -153,7 +172,6 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Home pages for users and vendors.
 app.get("/home-user", isLoggedIn, (req, res) => {
   if (req.user.accountType !== "user") return res.redirect("/home-vendor");
   res.sendFile(path.join(__dirname, "public", "home-user.html"));
@@ -163,19 +181,34 @@ app.get("/home-vendor", isLoggedIn, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home-vendor.html"));
 });
 
-// Local authentication endpoints.
-app.post("/login", passport.authenticate("local"), (req, res) => {
-  const redirectUrl =
-    req.user.accountType === "vendor" ? "/home-vendor" : "/home-user";
-  res.json({ redirectUrl });
+app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err);
+    if (!user)
+      return res
+        .status(400)
+        .json({ message: "Incorrect username or password" });
+    req.login(user, (err) => {
+      if (err) return next(err);
+      const redirectUrl =
+        user.accountType === "vendor" ? "/home-vendor" : "/home-user";
+      return res.json({ redirectUrl });
+    });
+  })(req, res, next);
 });
 
 app.post("/register", async (req, res) => {
-  const { username, password, accountType } = req.body;
-  console.log("Registration payload:", req.body);
+  const { username, password, accountType, displayName } = req.body;
   try {
     if (!accountType || (accountType !== "vendor" && accountType !== "user")) {
       return res.status(400).json({ message: "Invalid account type." });
+    }
+    if (accountType === "user") {
+      if (!displayName || displayName.trim() === "") {
+        return res
+          .status(400)
+          .json({ message: "Display Name is required for user accounts." });
+      }
     }
     let vendorInfo = undefined;
     if (accountType === "vendor") {
@@ -212,7 +245,7 @@ app.post("/register", async (req, res) => {
         service,
         companyName,
         averageCost,
-        typeOfCuisine: service === "Food" ? typeOfCuisine : undefined,
+        typeOfCuisine,
         description,
         tags: tagsArray,
       };
@@ -221,12 +254,14 @@ app.post("/register", async (req, res) => {
     if (existingUser)
       return res.status(400).json({ message: "Username is already taken" });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
+    const newUserData = {
       username,
       password: hashedPassword,
       accountType,
       vendorInfo,
-    });
+    };
+    if (accountType === "user") newUserData.displayName = displayName;
+    const newUser = new User(newUserData);
     await newUser.save();
     res.status(201).json({ message: "User created successfully!" });
   } catch (error) {
@@ -242,7 +277,6 @@ app.get("/logout", (req, res, next) => {
   });
 });
 
-// Vendor search endpoint.
 app.get("/vendors", isLoggedIn, async (req, res) => {
   try {
     const service = req.query.service;
@@ -255,7 +289,6 @@ app.get("/vendors", isLoggedIn, async (req, res) => {
   }
 });
 
-// Reservation creation endpoint – only for users.
 app.post("/reservations", isLoggedIn, async (req, res) => {
   if (req.user.accountType !== "user") {
     return res
@@ -291,7 +324,6 @@ app.post("/reservations", isLoggedIn, async (req, res) => {
   }
 });
 
-// Endpoint for vendors to update a reservation (accept or decline)
 app.put("/reservations/:id", isLoggedIn, async (req, res) => {
   if (req.user.accountType !== "vendor") {
     return res
@@ -322,7 +354,6 @@ app.put("/reservations/:id", isLoggedIn, async (req, res) => {
   }
 });
 
-// Endpoint for users to cancel their reservation.
 app.put("/reservations/:id/cancel", isLoggedIn, async (req, res) => {
   if (req.user.accountType !== "user") {
     return res
@@ -347,7 +378,6 @@ app.put("/reservations/:id/cancel", isLoggedIn, async (req, res) => {
   }
 });
 
-// Endpoint for vendors to fetch their reservations.
 app.get("/reservations", isLoggedIn, async (req, res) => {
   if (req.user.accountType !== "vendor") {
     return res
@@ -362,7 +392,6 @@ app.get("/reservations", isLoggedIn, async (req, res) => {
   }
 });
 
-// Endpoint for users to fetch their reservation history.
 app.get("/user-reservations", isLoggedIn, async (req, res) => {
   if (req.user.accountType !== "user") {
     return res
@@ -372,6 +401,124 @@ app.get("/user-reservations", isLoggedIn, async (req, res) => {
   try {
     const reservations = await Reservation.find({ user: req.user.username });
     res.json(reservations);
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
+// --- Chat Endpoints ---
+app.post("/messages", isLoggedIn, async (req, res) => {
+  const { reservationId, text } = req.body;
+  if (!reservationId || !text) {
+    return res
+      .status(400)
+      .json({ message: "Reservation ID and text are required." });
+  }
+  try {
+    const reservation = await Reservation.findById(reservationId);
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found." });
+    }
+    if (
+      req.user.username !== reservation.user &&
+      req.user.username !== reservation.vendor
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to message for this reservation.",
+      });
+    }
+    let senderName = "";
+    if (req.user.accountType === "vendor") {
+      senderName = req.user.vendorInfo?.companyName || "Vendor";
+    } else {
+      senderName = req.user.displayName;
+    }
+    const message = new Message({
+      reservation: reservationId,
+      sender: senderName,
+      text,
+    });
+    await message.save();
+    res.status(201).json({ message: "Message sent successfully!" });
+  } catch (error) {
+    console.error("Message error:", error);
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
+app.get("/messages/:reservationId", isLoggedIn, async (req, res) => {
+  const reservationId = req.params.reservationId;
+  try {
+    const reservation = await Reservation.findById(reservationId);
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found." });
+    }
+    if (
+      req.user.username !== reservation.user &&
+      req.user.username !== reservation.vendor
+    ) {
+      return res.status(403).json({
+        message:
+          "You are not authorized to view messages for this reservation.",
+      });
+    }
+    const messages = await Message.find({ reservation: reservationId }).sort({
+      timestamp: 1,
+    });
+    res.json(messages);
+  } catch (error) {
+    console.error("Get messages error:", error);
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
+// --- Review Endpoints ---
+// Allow users to leave only one review per vendor.
+app.post("/reviews", isLoggedIn, async (req, res) => {
+  if (req.user.accountType !== "user") {
+    return res.status(403).json({ message: "Only users can leave reviews." });
+  }
+  const { vendor, rating, text } = req.body;
+  if (!vendor || !rating) {
+    return res.status(400).json({ message: "Vendor and rating are required." });
+  }
+  if (rating < 1 || rating > 5) {
+    return res.status(400).json({ message: "Rating must be between 1 and 5." });
+  }
+  try {
+    // Ensure a review from this user (based on displayName) for this vendor doesn't already exist.
+    const existingReview = await Review.findOne({
+      vendor,
+      user: req.user.displayName,
+    });
+    if (existingReview) {
+      return res
+        .status(400)
+        .json({ message: "You have already left a review for this vendor." });
+    }
+    const review = new Review({
+      vendor,
+      user: req.user.displayName,
+      rating,
+      text,
+    });
+    await review.save();
+    res.status(201).json({ message: "Review submitted successfully!" });
+  } catch (error) {
+    console.error("Review error:", error);
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
+// Get all reviews for a vendor.
+app.get("/reviews", isLoggedIn, async (req, res) => {
+  const vendor = req.query.vendor;
+  if (!vendor) {
+    return res.status(400).json({ message: "Vendor is required." });
+  }
+  try {
+    const reviews = await Review.find({ vendor }).sort({ timestamp: -1 });
+    res.json(reviews);
   } catch (error) {
     res.status(500).json({ message: "An error occurred", error });
   }

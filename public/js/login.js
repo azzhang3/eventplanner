@@ -6,43 +6,64 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("loginForm");
   const registerForm = document.getElementById("registerForm");
   const registerSection = document.getElementById("registerSection");
-  const googleLoginBtn = document.getElementById("google-login-btn");
   const showRegisterBtn = document.getElementById("showRegister");
-  const darkModeToggle = document.getElementById("darkModeToggle");
-  const body = document.body;
+  const showLoginBtn = document.getElementById("showLogin");
 
-  // Check localStorage for dark mode preference
-  // if (localStorage.getItem("darkMode") === "enabled") {
-  //   body.classList.add("dark-mode");
-  //   darkModeToggle.checked = true;
-  // }
-  // darkModeToggle.addEventListener("change", function () {
-  //   if (darkModeToggle.checked) {
-  //     body.classList.add("dark-mode");
-  //     localStorage.setItem("darkMode", "enabled");
-  //   } else {
-  //     body.classList.remove("dark-mode");
-  //     localStorage.setItem("darkMode", "disabled");
-  //   }
-  // });
+  // Elements for toggling the Display Name field and vendor extra fields
+  const displayNameField = document.getElementById("displayNameField");
+  const regDisplayName = document.getElementById("reg-displayName");
+  const vendorExtraFields = document.getElementById("vendorExtraFields");
 
-  // Toggle registration form display
+  // Toggle between login and registration views
   showRegisterBtn.addEventListener("click", (e) => {
     e.preventDefault();
     registerSection.style.display = "block";
-    registerSection.classList.add("slide-in");
+    document.getElementById("loginSection").style.display = "none";
+    M.FormSelect.init(document.querySelectorAll("select"));
   });
 
-  // Toggle vendor extra fields based on account type selection
+  showLoginBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    registerSection.style.display = "none";
+    document.getElementById("loginSection").style.display = "block";
+  });
+
+  // Toggle extra fields based on selected account type
   const accountTypeSelect = document.getElementById("reg-accountType");
-  const vendorExtraFields = document.getElementById("vendorExtraFields");
   accountTypeSelect.addEventListener("change", (e) => {
     if (e.target.value === "vendor") {
       vendorExtraFields.style.display = "block";
+      // Enable vendor fields
+      vendorExtraFields
+        .querySelectorAll("input, select, textarea")
+        .forEach((el) => {
+          el.disabled = false;
+        });
+      displayNameField.style.display = "none";
+      regDisplayName.disabled = true;
+      regDisplayName.required = false;
+    } else if (e.target.value === "user") {
+      vendorExtraFields.style.display = "none";
+      // Disable vendor fields so they don't trigger validation
+      vendorExtraFields
+        .querySelectorAll("input, select, textarea")
+        .forEach((el) => {
+          el.disabled = true;
+        });
+      displayNameField.style.display = "block";
+      regDisplayName.disabled = false; // Enable for user accounts
+      regDisplayName.required = true; // Mark as required
     } else {
       vendorExtraFields.style.display = "none";
+      vendorExtraFields
+        .querySelectorAll("input, select, textarea")
+        .forEach((el) => {
+          el.disabled = true;
+        });
+      displayNameField.style.display = "none";
+      regDisplayName.disabled = true;
+      regDisplayName.required = false;
     }
-    // Reinitialize Materialize selects in case new ones were revealed.
     M.FormSelect.init(document.querySelectorAll("select"));
   });
 
@@ -57,12 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Handle login
+  // Handle login submission
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("login-username").value;
     const password = document.getElementById("login-password").value;
-
     fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -79,22 +99,20 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((error) => console.error("Error:", error));
   });
 
-  // Handle Google login button
-  // if (googleLoginBtn) {
-  //   googleLoginBtn.addEventListener("click", () => {
-  //     window.location.href = "/auth/google";
-  //   });
-  // }
-
-  // Handle registration
+  // Handle registration submission
   registerForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const username = document.getElementById("reg-username").value;
     const password = document.getElementById("reg-password").value;
     const accountType = document.getElementById("reg-accountType").value;
+    let registrationData = { username, password, accountType };
 
+    // For user accounts, include displayName.
+    if (accountType === "user") {
+      const displayName = document.getElementById("reg-displayName").value;
+      registrationData.displayName = displayName;
+    }
     // For vendor accounts, gather additional fields.
-    let vendorData = {};
     if (accountType === "vendor") {
       const service = document.getElementById("vendor-service").value;
       const companyName = document.getElementById("vendor-companyName").value;
@@ -103,9 +121,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "vendor-typeOfCuisine"
       ).value;
       const description = document.getElementById("vendor-description").value;
-      const tags = document.getElementById("vendor-tags").value; // comma-separated
-
-      vendorData = {
+      const tags = document.getElementById("vendor-tags").value;
+      registrationData = {
+        ...registrationData,
         service,
         companyName,
         averageCost,
@@ -114,15 +132,10 @@ document.addEventListener("DOMContentLoaded", () => {
         tags,
       };
     }
-
     if (!accountType) {
       alert("Please select an account type.");
       return;
     }
-
-    // Combine common registration fields with vendor data if applicable.
-    const registrationData = { username, password, accountType, ...vendorData };
-
     fetch("/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -135,7 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (status === 201) {
           alert(data.message);
           registerForm.reset();
-          location.reload();
+          showLoginBtn.click();
         } else {
           alert(data.message);
         }
