@@ -116,3 +116,7 @@ label[for="vendor-description"] {
 label[for="reviewText"] {
   margin-left: 10px;
 }
+
+label[for="reservationDetails"] {
+  margin-left: 10px;
+}
