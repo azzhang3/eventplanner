@@ -38,13 +38,26 @@
           <div class="card-content">
             <span class="card-title center-align">Login</span>
             <form id="loginForm">
-              <div class="input-field">
+              <div class="input-field" style="position: relative">
                 <input type="text" id="login-username" required />
                 <label for="login-username">Username</label>
               </div>
-              <div class="input-field">
+              <div class="input-field" style="position: relative">
                 <input type="password" id="login-password" required />
                 <label for="login-password">Password</label>
+                <!-- Eyeball icon for login password -->
+                <span
+                  id="toggleLoginPassword"
+                  style="
+                    position: absolute;
+                    top: 50%;
+                    right: 10px;
+                    cursor: pointer;
+                    transform: translateY(-50%);
+                  "
+                >
+                  <i class="fa fa-eye"></i>
+                </span>
               </div>
               <div class="center-align">
                 <button type="submit" class="btn">Login</button>
@@ -72,6 +85,19 @@
               <div class="input-field">
                 <input type="password" id="reg-password" required />
                 <label for="reg-password">Password</label>
+                <!-- Eyeball icon for register password -->
+                <span
+                  id="toggleRegisterPassword"
+                  style="
+                    position: absolute;
+                    top: 50%;
+                    right: 10px;
+                    cursor: pointer;
+                    transform: translateY(-50%);
+                  "
+                >
+                  <i class="fa fa-eye"></i>
+                </span>
               </div>
               <!-- Display Name field for user accounts -->
               <div

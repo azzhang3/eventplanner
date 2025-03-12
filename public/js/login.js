@@ -155,4 +155,36 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch((error) => console.error("Error:", error));
   });
+
+  // Toggle for login password
+  const toggleLoginPassword = document.getElementById("toggleLoginPassword");
+  const loginPasswordInput = document.getElementById("login-password");
+
+  if (toggleLoginPassword && loginPasswordInput) {
+    toggleLoginPassword.addEventListener("click", function () {
+      const type =
+        loginPasswordInput.getAttribute("type") === "password"
+          ? "text"
+          : "password";
+      loginPasswordInput.setAttribute("type", type);
+      this.querySelector("i").classList.toggle("fa-eye-slash");
+    });
+  }
+
+  // Toggle for registration password
+  const toggleRegisterPassword = document.getElementById(
+    "toggleRegisterPassword"
+  );
+  const registerPasswordInput = document.getElementById("reg-password");
+
+  if (toggleRegisterPassword && registerPasswordInput) {
+    toggleRegisterPassword.addEventListener("click", function () {
+      const type =
+        registerPasswordInput.getAttribute("type") === "password"
+          ? "text"
+          : "password";
+      registerPasswordInput.setAttribute("type", type);
+      this.querySelector("i").classList.toggle("fa-eye-slash");
+    });
+  }
 });

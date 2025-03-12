@@ -120,3 +120,13 @@ label[for="reviewText"] {
 label[for="reservationDetails"] {
   margin-left: 10px;
 }
+
+@media only screen and (max-width: 992px) {
+  #nav-mobile li a.btn {
+    display: inline-block !important;
+  }
+}
+
+.nav-wrapper ul#nav-mobile.hide-on-med-and-down {
+  display: block !important;
+}
