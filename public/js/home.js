@@ -18,6 +18,22 @@ document.addEventListener("DOMContentLoaded", () => {
     return starsHTML;
   }
 
+  // --- Time Table Setup for Reservations ---
+  const timeSlots = document.querySelectorAll(
+    "#reservationTimeTable .time-slot"
+  );
+  timeSlots.forEach((button) => {
+    button.addEventListener("click", function () {
+      // Remove active class from all time slots
+      timeSlots.forEach((btn) => btn.classList.remove("active"));
+      // Add active class to the clicked button
+      this.classList.add("active");
+      // Update hidden input with selected time
+      document.getElementById("reservationTime").value =
+        this.getAttribute("data-time");
+    });
+  });
+
   // Determine current page by body id.
   const pageId = document.body.id;
   if (pageId === "home-user") {
@@ -51,9 +67,12 @@ document.addEventListener("DOMContentLoaded", () => {
                   }</p>
                   <p>${info.description || ""}</p>
                   <p>Tags: ${info.tags ? info.tags.join(", ") : ""}</p>
-                  <button class="btn reserve-btn" data-vendor="${
-                    vendor.username
-                  }">Make Reservation</button>
+                  <button 
+                    class="btn reserve-btn" 
+                    data-vendor="${vendor.username}" 
+                    data-company-name="${info.companyName || vendor.username}">
+                    Make Reservation
+                </button>
                   <button class="btn review-btn" data-vendor="${
                     vendor.username
                   }">Leave Review</button>
@@ -64,10 +83,25 @@ document.addEventListener("DOMContentLoaded", () => {
           .join("");
         document.querySelectorAll(".reserve-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
+            // Set the vendor field with the username (for internal logic)
             document.getElementById("reservationVendor").value =
               btn.getAttribute("data-vendor");
-            document.getElementById("reservationFormContainer").style.display =
-              "block";
+
+            // Get the company name from the data attribute
+            const companyName = btn.getAttribute("data-company-name");
+
+            // Update the reservation form header to include the company name
+            document.querySelector("#reservationFormContainer h5").innerText =
+              "Make a Reservation for " + companyName;
+
+            // Show the reservation form container
+            const reservationFormContainer = document.getElementById(
+              "reservationFormContainer"
+            );
+            reservationFormContainer.style.display = "block";
+
+            // Scroll to the top of the page smoothly
+            window.scrollTo({ top: 0, behavior: "smooth" });
           });
         });
         document.querySelectorAll(".review-btn").forEach((btn) => {
@@ -130,30 +164,41 @@ document.addEventListener("DOMContentLoaded", () => {
         historyDiv.innerHTML = reservations
           .map(
             (r) => `
-            <div class="card">
-              <div class="card-content">
-                <span class="card-title">${r.name}</span>
-                <p><strong>Date:</strong> ${new Date(
-                  r.date
-                ).toLocaleDateString()}</p>
-                <p><strong>Time:</strong> ${r.time}</p>
-                <p><strong>Location:</strong> ${r.location}</p>
-                <p>${r.details || ""}</p>
-                <p><strong>Status:</strong> ${r.status}</p>
-                ${
-                  r.status === "pending"
-                    ? `<button class="btn cancel-btn" data-id="${r._id}">Cancel Reservation</button>`
-                    : ""
-                }
-                <button class="btn chat-btn" data-id="${r._id}">Chat</button>
-                <button class="btn review-btn" data-vendor="${
-                  r.vendor
-                }">Leave Review</button>
+          <div class="card">
+            <div class="card-content">
+              <!-- Display vendor's company name if available, else fallback to vendor username -->
+              <div class="company-name" style="font-size: 1.3em; color: #34495e;">
+                ${r.vendorCompany || r.vendor}
               </div>
+              <!-- Reservation name -->
+              <div class="reservation-name" style="font-size: 1.1em; color: #34495e;">
+                ${r.name}
+              </div>
+              <p><strong>Date:</strong> ${new Date(
+                r.date
+              ).toLocaleDateString()}</p>
+              <p><strong>Time:</strong> ${r.time}</p>
+              <p><strong>Location:</strong> ${r.location}</p>
+              <p>${r.details || ""}</p>
+              <p><strong>Status:</strong> ${r.status}</p>
+              ${
+                r.status === "pending"
+                  ? `<button class="btn cancel-btn" data-id="${r._id}">Cancel Reservation</button>`
+                  : r.status === "canceled" || r.status === "declined"
+                  ? `<button class="btn delete-btn" data-id="${r._id}">Delete Reservation</button>`
+                  : ""
+              }
+              <button class="btn chat-btn" data-id="${r._id}">Chat</button>
+              <button class="btn review-btn" data-vendor="${
+                r.vendor
+              }">Leave Review</button>
             </div>
-          `
+          </div>
+        `
           )
           .join("");
+
+        // Attach event listeners for cancel, delete, chat, and review actions:
         document.querySelectorAll(".cancel-btn").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const resId = btn.getAttribute("data-id");
@@ -170,6 +215,24 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
         });
+
+        document.querySelectorAll(".delete-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const resId = btn.getAttribute("data-id");
+            try {
+              const resp = await fetch(`/reservations/${resId}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+              });
+              const result = await resp.json();
+              alert(result.message);
+              loadReservationHistory();
+            } catch (err) {
+              console.error("Error deleting reservation:", err);
+            }
+          });
+        });
+
         document.querySelectorAll(".chat-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
             openChat(btn.getAttribute("data-id"));
@@ -184,6 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error fetching reservation history:", error);
       }
     }
+
     loadReservationHistory();
   } else if (pageId === "home-vendor") {
     // ------------------
@@ -201,30 +265,34 @@ document.addEventListener("DOMContentLoaded", () => {
         reservationListDiv.innerHTML = reservations
           .map(
             (r) => `
-            <div class="card">
-              <div class="card-content">
-                <span class="card-title">${r.name}</span>
-                <p><strong>Date:</strong> ${new Date(
-                  r.date
-                ).toLocaleDateString()}</p>
-                <p><strong>Time:</strong> ${r.time}</p>
-                <p><strong>Location:</strong> ${r.location}</p>
-                <p>${r.details || ""}</p>
-                <p><strong>Status:</strong> ${r.status}</p>
-                ${
-                  r.status === "pending"
-                    ? `
-                  <button class="btn accept-btn" data-id="${r._id}">Accept</button>
-                  <button class="btn decline-btn" data-id="${r._id}">Decline</button>
-                `
-                    : ""
-                }
-                <button class="btn chat-btn" data-id="${r._id}">Chat</button>
-              </div>
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">${r.name}</span>
+              <p><strong>Date:</strong> ${new Date(
+                r.date
+              ).toLocaleDateString()}</p>
+              <p><strong>Time:</strong> ${r.time}</p>
+              <p><strong>Location:</strong> ${r.location}</p>
+              <p>${r.details || ""}</p>
+              <p><strong>Status:</strong> ${r.status}</p>
+              ${
+                r.status === "pending"
+                  ? `
+                    <button class="btn accept-btn" data-id="${r._id}">Accept</button>
+                    <button class="btn decline-btn" data-id="${r._id}">Decline</button>
+                  `
+                  : r.status === "canceled" || r.status === "declined"
+                  ? `<button class="btn delete-btn" data-id="${r._id}">Delete Reservation</button>`
+                  : ""
+              }
+              <button class="btn chat-btn" data-id="${r._id}">Chat</button>
             </div>
-          `
+          </div>
+        `
           )
           .join("");
+
+        // Attach accept event listeners
         document.querySelectorAll(".accept-btn").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const id = btn.getAttribute("data-id");
@@ -242,6 +310,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
         });
+
+        // Attach decline event listeners
         document.querySelectorAll(".decline-btn").forEach((btn) => {
           btn.addEventListener("click", async () => {
             const id = btn.getAttribute("data-id");
@@ -259,6 +329,26 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           });
         });
+
+        // Attach delete event listeners (for canceled/declined reservations)
+        document.querySelectorAll(".delete-btn").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-id");
+            try {
+              const res = await fetch(`/reservations/${id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+              });
+              const result = await res.json();
+              alert(result.message);
+              loadReservations();
+            } catch (err) {
+              console.error("Error deleting reservation:", err);
+            }
+          });
+        });
+
+        // Attach chat event listeners
         document.querySelectorAll(".chat-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
             openChat(btn.getAttribute("data-id"));

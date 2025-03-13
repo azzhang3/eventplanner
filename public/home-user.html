@@ -32,6 +32,150 @@
     <div class="container" style="margin-top: 30px">
       <h4>Welcome, User!</h4>
       <div class="row">
+        <!-- Hidden Reservation Form -->
+        <div
+          id="reservationFormContainer"
+          style="display: none; margin-top: 20px"
+        >
+          <div class="card">
+            <div class="card-content">
+              <h5>Make a Reservation</h5>
+              <form id="reservationForm">
+                <div class="input-field">
+                  <input type="text" id="reservationName" required />
+                  <label for="reservationName">Name (First and Last)</label>
+                </div>
+                <div class="input-field">
+                  <input type="date" id="reservationDate" required />
+                  <label for="reservationDate">Date</label>
+                </div>
+                <!-- Custom Time Table -->
+                <div class="time-table">
+                  <label for="reservationTimeTable">Select Time</label>
+                  <div id="reservationTimeTable">
+                    <button type="button" class="time-slot" data-time="09:00">
+                      09:00am
+                    </button>
+                    <button type="button" class="time-slot" data-time="09:30">
+                      09:30am
+                    </button>
+                    <button type="button" class="time-slot" data-time="10:00">
+                      10:00am
+                    </button>
+                    <button type="button" class="time-slot" data-time="10:30">
+                      10:30am
+                    </button>
+                    <button type="button" class="time-slot" data-time="11:00">
+                      11:00am
+                    </button>
+                    <button type="button" class="time-slot" data-time="11:30">
+                      11:30am
+                    </button>
+                    <button type="button" class="time-slot" data-time="12:00">
+                      12:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="12:30">
+                      12:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="13:00">
+                      01:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="13:30">
+                      01:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="14:00">
+                      02:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="14:30">
+                      02:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="15:00">
+                      03:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="15:30">
+                      03:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="16:00">
+                      04:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="16:30">
+                      04:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="17:00">
+                      05:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="17:30">
+                      05:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="18:00">
+                      06:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="18:30">
+                      06:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="19:00">
+                      07:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="19:30">
+                      07:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="20:00">
+                      08:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="20:30">
+                      08:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="21:00">
+                      09:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="21:30">
+                      09:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="22:00">
+                      10:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="22:30">
+                      10:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="23:00">
+                      11:00pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="23:30">
+                      11:30pm
+                    </button>
+                    <button type="button" class="time-slot" data-time="00:00">
+                      12:00am
+                    </button>
+                  </div>
+                  <!-- Hidden input to store the selected time -->
+                  <input
+                    type="hidden"
+                    id="reservationTime"
+                    name="reservationTime"
+                    required
+                  />
+                </div>
+                <div class="input-field">
+                  <input type="text" id="reservationLocation" required />
+                  <label for="reservationLocation">Location</label>
+                </div>
+                <div class="input-field">
+                  <textarea
+                    id="reservationDetails"
+                    class="materialize-textarea"
+                  ></textarea>
+                  <label for="reservationDetails">Additional Details</label>
+                </div>
+                <!-- Hidden vendor field -->
+                <input type="hidden" id="reservationVendor" />
+                <button type="submit" class="btn">Submit Reservation</button>
+                <button type="button" id="cancelReservation" class="btn red">
+                  Cancel
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
         <!-- Vendor Search Section -->
         <div class="col s12 m6">
           <h5>Search for Vendors</h5>
@@ -55,77 +199,6 @@
         <div class="col s12 m6">
           <h5>Your Reservation History</h5>
           <div id="reservationHistory"></div>
-        </div>
-      </div>
-      <!-- Hidden Reservation Form -->
-      <div
-        id="reservationFormContainer"
-        style="display: none; margin-top: 20px"
-      >
-        <div class="card">
-          <div class="card-content">
-            <h5>Make a Reservation</h5>
-            <form id="reservationForm">
-              <div class="input-field">
-                <input type="text" id="reservationName" required />
-                <label for="reservationName">Name (First and Last)</label>
-              </div>
-              <div class="input-field">
-                <input type="date" id="reservationDate" required />
-                <label for="reservationDate">Date</label>
-              </div>
-              <div class="input-field">
-                <select id="reservationTime">
-                  <option value="" disabled selected>Select Time</option>
-                  <option value="09:00">09:00</option>
-                  <option value="09:30">09:30</option>
-                  <option value="10:00">10:00</option>
-                  <option value="10:30">10:30</option>
-                  <option value="11:00">11:00</option>
-                  <option value="11:30">11:30</option>
-                  <option value="12:00">12:00</option>
-                  <option value="12:30">12:30</option>
-                  <option value="13:00">13:00</option>
-                  <option value="13:30">13:30</option>
-                  <option value="14:00">14:00</option>
-                  <option value="14:30">14:30</option>
-                  <option value="15:00">15:00</option>
-                  <option value="15:30">15:30</option>
-                  <option value="16:00">16:00</option>
-                  <option value="16:30">16:30</option>
-                  <option value="17:00">17:00</option>
-                  <option value="17:30">17:30</option>
-                  <option value="18:00">18:00</option>
-                  <option value="18:30">18:30</option>
-                  <option value="19:00">19:00</option>
-                  <option value="19:30">19:30</option>
-                  <option value="20:00">20:00</option>
-                  <option value="20:30">20:30</option>
-                  <option value="21:00">21:00</option>
-                  <option value="21:30">21:30</option>
-                  <option value="22:00">22:00</option>
-                </select>
-                <label for="reservationTime">Time</label>
-              </div>
-              <div class="input-field">
-                <input type="text" id="reservationLocation" required />
-                <label for="reservationLocation">Location</label>
-              </div>
-              <div class="input-field">
-                <textarea
-                  id="reservationDetails"
-                  class="materialize-textarea"
-                ></textarea>
-                <label for="reservationDetails">Additional Details</label>
-              </div>
-              <!-- Hidden vendor field -->
-              <input type="hidden" id="reservationVendor" />
-              <button type="submit" class="btn">Submit Reservation</button>
-              <button type="button" id="cancelReservation" class="btn red">
-                Cancel
-              </button>
-            </form>
-          </div>
         </div>
       </div>
     </div>
