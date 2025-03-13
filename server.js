@@ -278,9 +278,33 @@ app.get("/logout", (req, res, next) => {
 app.get("/vendors", isLoggedIn, async (req, res) => {
   try {
     const service = req.query.service;
-    let query = { accountType: "vendor" };
-    if (service) query["vendorInfo.service"] = service;
-    const vendors = await User.find(query, "vendorInfo username");
+    let match = { accountType: "vendor" };
+    if (service) {
+      match["vendorInfo.service"] = service;
+    }
+    const vendors = await User.aggregate([
+      { $match: match },
+      {
+        $lookup: {
+          from: "reviews", // the collection name for reviews
+          localField: "username", // vendor's username in the User model
+          foreignField: "vendor", // vendor field in the Review model
+          as: "reviews",
+        },
+      },
+      {
+        $addFields: {
+          averageRating: { $avg: "$reviews.rating" },
+        },
+      },
+      {
+        $project: {
+          vendorInfo: 1,
+          username: 1,
+          averageRating: { $ifNull: ["$averageRating", 0] },
+        },
+      },
+    ]);
     res.json(vendors);
   } catch (err) {
     res.status(500).json({ message: "Error fetching vendors", error: err });

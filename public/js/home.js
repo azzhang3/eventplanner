@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize Materialize components.
   M.FormSelect.init(document.querySelectorAll("select"));
   M.Modal.init(document.querySelectorAll(".modal"));
+
   let currentReservationId = null;
   let currentReviewVendor = null;
 
@@ -18,6 +19,42 @@ document.addEventListener("DOMContentLoaded", () => {
     return starsHTML;
   }
 
+  // --- Dark Mode Toggle ---
+  const darkModeToggle = document.getElementById("darkModeToggle");
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      document.body.classList.toggle("dark-mode");
+      if (document.body.classList.contains("dark-mode")) {
+        darkModeToggle.innerText = "Light Mode";
+      } else {
+        darkModeToggle.innerText = "Dark Mode";
+      }
+    });
+  }
+
+  // --- Fetch current user and update header greeting ---
+  fetch("/current-user")
+    .then((res) => res.json())
+    .then((user) => {
+      if (user.accountType === "user") {
+        const welcomeMessage = document.getElementById("welcomeMessage");
+        if (welcomeMessage) {
+          welcomeMessage.innerText = "Welcome back, " + user.displayName + "!";
+        }
+      } else if (user.accountType === "vendor") {
+        const dashboardMessage = document.getElementById("dashboardMessage");
+        if (dashboardMessage) {
+          const company =
+            user.vendorInfo && user.vendorInfo.companyName
+              ? user.vendorInfo.companyName
+              : user.username;
+          dashboardMessage.innerText = "Dashboard for " + company;
+        }
+      }
+    })
+    .catch((error) => console.error("Error fetching current user:", error));
+
   // --- Time Table Setup for Reservations ---
   const timeSlots = document.querySelectorAll(
     "#reservationTimeTable .time-slot"
@@ -33,6 +70,23 @@ document.addEventListener("DOMContentLoaded", () => {
         this.getAttribute("data-time");
     });
   });
+
+  function renderStars(rating) {
+    let starsHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      if (rating >= i) {
+        // Full star if rating is greater than or equal to the star number.
+        starsHTML += '<i class="fa fa-star" style="color: gold;"></i>';
+      } else if (rating >= i - 0.5) {
+        // Half star if rating is between (i - 0.5) and i.
+        starsHTML += '<i class="fa fa-star-half-o" style="color: gold;"></i>';
+      } else {
+        // Empty star otherwise.
+        starsHTML += '<i class="fa fa-star-o" style="color: gold;"></i>';
+      }
+    }
+    return starsHTML;
+  }
 
   // Determine current page by body id.
   const pageId = document.body.id;
@@ -57,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
         vendorResultsDiv.innerHTML = vendors
           .map((vendor) => {
             const info = vendor.vendorInfo || {};
+            // The average rating
+            const avgRating = vendor.averageRating;
             return `
               <div class="card">
                 <div class="card-content">
@@ -67,6 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   }</p>
                   <p>${info.description || ""}</p>
                   <p>Tags: ${info.tags ? info.tags.join(", ") : ""}</p>
+                  <p>Average Rating: ${renderStars(avgRating)}</p>
                   <button 
                     class="btn reserve-btn" 
                     data-vendor="${vendor.username}" 
@@ -134,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ name, date, time, location, details, vendor }),
         });
         const data = await response.json();
-        alert(data.message);
+        M.toast({ html: data.message, classes: "rounded" });
         reservationForm.reset();
         document.getElementById("reservationFormContainer").style.display =
           "none";
@@ -208,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
               });
               const result = await resp.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservationHistory();
             } catch (err) {
               console.error("Error canceling reservation:", err);
@@ -225,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
               });
               const result = await resp.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservationHistory();
             } catch (err) {
               console.error("Error deleting reservation:", err);
@@ -303,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ status: "accepted" }),
               });
               const result = await res.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservations();
             } catch (err) {
               console.error("Error updating reservation:", err);
@@ -322,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ status: "declined" }),
               });
               const result = await res.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservations();
             } catch (err) {
               console.error("Error updating reservation:", err);
@@ -340,7 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
               });
               const result = await res.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservations();
             } catch (err) {
               console.error("Error deleting reservation:", err);
@@ -493,7 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ vendor, rating, text }),
         });
         const data = await response.json();
-        alert(data.message);
+        M.toast({ html: data.message, classes: "rounded" });
         document.getElementById("reviewForm").reset();
         loadReviews(vendor);
       } catch (error) {
