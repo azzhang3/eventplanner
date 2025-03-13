@@ -88,34 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return starsHTML;
   }
 
-  // Function to update the vendor's average rating on the card
-  function updateVendorRating(vendorUsername) {
-    // Call an endpoint that returns all reviews for the vendor.
-    fetch(`/reviews?vendor=${encodeURIComponent(vendorUsername)}`)
-      .then((res) => res.json())
-      .then((reviews) => {
-        if (reviews.length > 0) {
-          // Calculate the average rating
-          const total = reviews.reduce((sum, review) => sum + review.rating, 0);
-          const average = total / reviews.length;
-          // Find the vendor card element that belongs to this vendor.
-          // You can add a data attribute to your vendor card (e.g., data-vendor="vendorUsername")
-          const vendorCard = document.querySelector(
-            `[data-vendor="${vendorUsername}"]`
-          );
-          if (vendorCard) {
-            // Update the rating element inside the card.
-            // For example, you might include a <div class="vendor-rating"></div> inside the card-content.
-            const ratingElem = vendorCard.querySelector(".vendor-rating");
-            if (ratingElem) {
-              ratingElem.innerHTML = renderStars(average);
-            }
-          }
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-
   // Determine current page by body id.
   const pageId = document.body.id;
   if (pageId === "home-user") {
