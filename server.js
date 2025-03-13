@@ -78,6 +78,7 @@ const reservationSchema = new mongoose.Schema({
   location: { type: String, required: true },
   details: { type: String },
   vendor: { type: String, required: true },
+  vendorCompany: { type: String },
   user: { type: String, required: true },
   status: {
     type: String,
@@ -303,13 +304,20 @@ app.post("/reservations", isLoggedIn, async (req, res) => {
     if (isNaN(parsedDate.getTime())) {
       return res.status(400).json({ message: "Invalid date format." });
     }
+    // Look up the vendor record to get the company name
+    const vendorRecord = await User.findOne({ username: vendor });
+    let vendorCompany = vendor; // fallback to vendor username if not found
+    if (vendorRecord && vendorRecord.vendorInfo) {
+      vendorCompany = vendorRecord.vendorInfo.companyName || vendor;
+    }
     const newReservation = new Reservation({
       name,
       date: parsedDate,
       time,
       location,
       details,
-      vendor,
+      vendor, // vendor username for internal use
+      vendorCompany, // vendor company name for display
       user: req.user.username,
       status: "pending",
     });
@@ -514,6 +522,29 @@ app.get("/reviews", isLoggedIn, async (req, res) => {
     const reviews = await Review.find({ vendor }).sort({ timestamp: -1 });
     res.json(reviews);
   } catch (error) {
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
+app.delete("/reservations/:id", isLoggedIn, async (req, res) => {
+  try {
+    const reservation = await Reservation.findById(req.params.id);
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found." });
+    }
+    // Only allow deletion if the reservation is canceled or declined.
+    if (
+      reservation.status !== "canceled" &&
+      reservation.status !== "declined"
+    ) {
+      return res.status(400).json({
+        message: "Only canceled or declined reservations can be deleted.",
+      });
+    }
+    await Reservation.deleteOne({ _id: req.params.id });
+    res.json({ message: "Reservation deleted successfully." });
+  } catch (error) {
+    console.error("Delete reservation error:", error);
     res.status(500).json({ message: "An error occurred", error });
   }
 });

@@ -130,3 +130,36 @@ label[for="reservationDetails"] {
 .nav-wrapper ul#nav-mobile.hide-on-med-and-down {
   display: block !important;
 }
+
+/* Styles for the custom time table */
+.time-table {
+  margin-bottom: 15px;
+}
+
+#reservationTimeTable {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.time-slot {
+  padding: 8px 12px;
+  margin: 5px 0;
+  border: 1px solid #3498db;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  min-width: 70px;
+  text-align: center;
+}
+
+.time-slot:hover {
+  background-color: #f0f8ff;
+}
+
+.time-slot.active {
+  background-color: #3498db;
+  color: #fff;
+  border-color: #2980b9;
+}
