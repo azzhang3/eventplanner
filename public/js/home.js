@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize Materialize components.
   M.FormSelect.init(document.querySelectorAll("select"));
   M.Modal.init(document.querySelectorAll(".modal"));
+
   let currentReservationId = null;
   let currentReviewVendor = null;
 
@@ -17,6 +18,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     return starsHTML;
   }
+
+  // --- Dark Mode Toggle ---
+  const darkModeToggle = document.getElementById("darkModeToggle");
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      document.body.classList.toggle("dark-mode");
+      if (document.body.classList.contains("dark-mode")) {
+        darkModeToggle.innerText = "Light Mode";
+      } else {
+        darkModeToggle.innerText = "Dark Mode";
+      }
+    });
+  }
+
+  // --- Fetch current user and update header greeting ---
+  fetch("/current-user")
+    .then((res) => res.json())
+    .then((user) => {
+      if (user.accountType === "user") {
+        const welcomeMessage = document.getElementById("welcomeMessage");
+        if (welcomeMessage) {
+          welcomeMessage.innerText = "Welcome back, " + user.displayName + "!";
+        }
+      } else if (user.accountType === "vendor") {
+        const dashboardMessage = document.getElementById("dashboardMessage");
+        if (dashboardMessage) {
+          const company =
+            user.vendorInfo && user.vendorInfo.companyName
+              ? user.vendorInfo.companyName
+              : user.username;
+          dashboardMessage.innerText = "Dashboard for " + company;
+        }
+      }
+    })
+    .catch((error) => console.error("Error fetching current user:", error));
 
   // --- Time Table Setup for Reservations ---
   const timeSlots = document.querySelectorAll(
