@@ -249,6 +249,18 @@ nav {
   transition: opacity 0.4s ease;
 }
 
+#welcomeMessage,
+#dashboardMessage {
+  opacity: 0;
+  animation: fadeIn 1s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
 /* Dark Mode Styles */
 .dark-mode {
   background-color: #121212;
@@ -342,4 +354,21 @@ nav {
 .dark-mode .time-slot.active {
   background-color: #3a8ee6;
   border-color: #337acc;
+}
+
+.dark-mode .card {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.dark-mode .card .card-title,
+.dark-mode .card p {
+  color: #e0e0e0;
+}
+
+/* And if you want to adjust the star colors in dark mode */
+.dark-mode .fa-star,
+.dark-mode .fa-star-o {
+  color: #f1c40f;
 }

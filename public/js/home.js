@@ -71,6 +71,51 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  function renderStars(rating) {
+    let starsHTML = "";
+    for (let i = 1; i <= 5; i++) {
+      if (rating >= i) {
+        // Full star if rating is greater than or equal to the star number.
+        starsHTML += '<i class="fa fa-star" style="color: gold;"></i>';
+      } else if (rating >= i - 0.5) {
+        // Half star if rating is between (i - 0.5) and i.
+        starsHTML += '<i class="fa fa-star-half-o" style="color: gold;"></i>';
+      } else {
+        // Empty star otherwise.
+        starsHTML += '<i class="fa fa-star-o" style="color: gold;"></i>';
+      }
+    }
+    return starsHTML;
+  }
+
+  // Function to update the vendor's average rating on the card
+  function updateVendorRating(vendorUsername) {
+    // Call an endpoint that returns all reviews for the vendor.
+    fetch(`/reviews?vendor=${encodeURIComponent(vendorUsername)}`)
+      .then((res) => res.json())
+      .then((reviews) => {
+        if (reviews.length > 0) {
+          // Calculate the average rating
+          const total = reviews.reduce((sum, review) => sum + review.rating, 0);
+          const average = total / reviews.length;
+          // Find the vendor card element that belongs to this vendor.
+          // You can add a data attribute to your vendor card (e.g., data-vendor="vendorUsername")
+          const vendorCard = document.querySelector(
+            `[data-vendor="${vendorUsername}"]`
+          );
+          if (vendorCard) {
+            // Update the rating element inside the card.
+            // For example, you might include a <div class="vendor-rating"></div> inside the card-content.
+            const ratingElem = vendorCard.querySelector(".vendor-rating");
+            if (ratingElem) {
+              ratingElem.innerHTML = renderStars(average);
+            }
+          }
+        }
+      })
+      .catch((err) => console.error(err));
+  }
+
   // Determine current page by body id.
   const pageId = document.body.id;
   if (pageId === "home-user") {
@@ -94,6 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
         vendorResultsDiv.innerHTML = vendors
           .map((vendor) => {
             const info = vendor.vendorInfo || {};
+            // The average rating
+            const avgRating = vendor.averageRating;
             return `
               <div class="card">
                 <div class="card-content">
@@ -104,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   }</p>
                   <p>${info.description || ""}</p>
                   <p>Tags: ${info.tags ? info.tags.join(", ") : ""}</p>
+                  <p>Average Rating: ${renderStars(avgRating)}</p>
                   <button 
                     class="btn reserve-btn" 
                     data-vendor="${vendor.username}" 
