@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ name, date, time, location, details, vendor }),
         });
         const data = await response.json();
-        alert(data.message);
+        M.toast({ html: data.message, classes: "rounded" });
         reservationForm.reset();
         document.getElementById("reservationFormContainer").style.display =
           "none";
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
               });
               const result = await resp.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservationHistory();
             } catch (err) {
               console.error("Error canceling reservation:", err);
@@ -225,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
               });
               const result = await resp.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservationHistory();
             } catch (err) {
               console.error("Error deleting reservation:", err);
@@ -303,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ status: "accepted" }),
               });
               const result = await res.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservations();
             } catch (err) {
               console.error("Error updating reservation:", err);
@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({ status: "declined" }),
               });
               const result = await res.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservations();
             } catch (err) {
               console.error("Error updating reservation:", err);
@@ -340,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { "Content-Type": "application/json" },
               });
               const result = await res.json();
-              alert(result.message);
+              M.toast({ html: result.message, classes: "rounded" });
               loadReservations();
             } catch (err) {
               console.error("Error deleting reservation:", err);
@@ -493,7 +493,7 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ vendor, rating, text }),
         });
         const data = await response.json();
-        alert(data.message);
+        M.toast({ html: data.message, classes: "rounded" });
         document.getElementById("reviewForm").reset();
         loadReviews(vendor);
       } catch (error) {

@@ -1,19 +1,49 @@
+/* CSS Variables for easy customization */
+:root {
+  --primary-color: #3498db;
+  --primary-hover: #2980b9;
+  --secondary-color: #2c3e50;
+  --text-color: #34495e;
+  --card-bg: #ffffff;
+  --body-bg: #f0f2f5;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#toast-container {
+  top: 20px !important;
+  bottom: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: auto;
+  text-align: center;
+}
+
+#toast-container .toast {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
 /* Global Styles */
 body {
   font-family: "Roboto", Arial, sans-serif;
   margin: 0;
-  padding: 0, 20px, 20px, 20px;
-  background-color: #f0f2f5;
+  padding: 0px;
+  background: #e0e4e8;
+  color: var(--text-color);
 }
 
 /* Navigation */
 .nav-wrapper {
-  background-color: #2c3e50;
+  background-color: var(--secondary-color);
+  padding: 0px;
 }
 
 .nav-wrapper a.brand-logo {
   font-family: "Roboto Slab", serif;
-  font-size: 1.5em;
+  font-size: 1.8em;
   color: #ecf0f1;
 }
 
@@ -26,6 +56,7 @@ body {
   max-width: 90%;
 }
 
+/* Dashboard container for vendor/user pages */
 #dashboard {
   margin: auto;
   width: 80%;
@@ -33,36 +64,50 @@ body {
 
 /* Cards */
 .card {
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   padding: 20px;
   margin-bottom: 20px;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+#loginSectionCard:hover,
+#registerSectionCard:hover {
+  transform: none;
 }
 
 .card .card-title {
-  font-size: 1.3em;
+  font-size: 1.4em;
   margin-bottom: 10px;
-  color: #34495e;
+  color: var(--text-color);
 }
 
 /* Buttons */
 .btn {
-  background-color: #3498db;
+  background-color: var(--primary-color);
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
   display: inline-block;
   text-align: center;
   line-height: 1.5;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 .btn:hover {
-  background-color: #2980b9;
+  background-color: var(--primary-hover);
   transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Input Fields */
@@ -74,24 +119,26 @@ body {
   border: 1px solid #bdc3c7;
   border-radius: 4px;
   font-size: 1em;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
   margin-bottom: 15px;
 }
 
 .input-field input:focus,
 .input-field textarea:focus,
 .input-field select:focus {
-  border-color: #3498db;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
 }
 
 /* Modal Styling */
 .modal {
   border-radius: 8px;
+  padding: 20px;
 }
 
 /* Additional Customizations */
 .card-action a {
-  color: #3498db;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: bold;
 }
@@ -102,25 +149,21 @@ body {
 
 #showLogin,
 #showRegister {
-  color: #3498db;
+  color: var(--primary-color);
   cursor: pointer;
   display: block;
   text-align: center;
   margin: 0;
 }
 
-label[for="vendor-description"] {
-  margin-left: 10px;
-}
-
-label[for="reviewText"] {
-  margin-left: 10px;
-}
-
+/* Label adjustments */
+label[for="vendor-description"],
+label[for="reviewText"],
 label[for="reservationDetails"] {
   margin-left: 10px;
 }
 
+/* Responsive adjustments */
 @media only screen and (max-width: 992px) {
   #nav-mobile li a.btn {
     display: inline-block !important;
@@ -145,13 +188,14 @@ label[for="reservationDetails"] {
 .time-slot {
   padding: 8px 12px;
   margin: 5px 0;
-  border: 1px solid #3498db;
+  border: 1px solid var(--primary-color);
   border-radius: 4px;
   background-color: #fff;
   cursor: pointer;
   transition: background-color 0.3s ease;
   min-width: 70px;
   text-align: center;
+  font-weight: bold;
 }
 
 .time-slot:hover {
@@ -159,7 +203,48 @@ label[for="reservationDetails"] {
 }
 
 .time-slot.active {
-  background-color: #3498db;
+  background-color: var(--primary-color);
   color: #fff;
-  border-color: #2980b9;
+  border-color: var(--primary-hover);
+}
+
+/* Make nav sticky so it stays at the top */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--secondary-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+@media only screen and (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+  .card {
+    padding: 15px;
+  }
+  .btn {
+    padding: 8px 16px;
+    font-size: 0.9em;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Apply fadeIn to cards */
+.card {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Optionally add a transition to modals */
+.modal {
+  transition: opacity 0.4s ease;
 }

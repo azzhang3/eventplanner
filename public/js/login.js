@@ -93,7 +93,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.redirectUrl) {
           window.location.href = data.redirectUrl;
         } else {
-          alert(data.message || "Invalid username or password");
+          M.toast({
+            html: data.message || "Invalid username or password",
+            classes: "rounded",
+          });
         }
       })
       .catch((error) => console.error("Error:", error));
