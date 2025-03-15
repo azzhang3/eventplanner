@@ -278,17 +278,42 @@ app.get("/logout", (req, res, next) => {
 app.get("/vendors", isLoggedIn, async (req, res) => {
   try {
     const service = req.query.service;
+    const name = req.query.name;
+    const price = req.query.price;
+    const tags = req.query.tags;
     let match = { accountType: "vendor" };
+
     if (service) {
       match["vendorInfo.service"] = service;
     }
+
+    if (name) {
+      // Only search by company name (case-insensitive)
+      match["vendorInfo.companyName"] = { $regex: name, $options: "i" };
+    }
+
+    if (price) {
+      match["vendorInfo.averageCost"] = price;
+    }
+
+    if (tags) {
+      // Convert comma-separated tags into an array and match any tag using $in
+      const tagsArray = tags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag);
+      if (tagsArray.length > 0) {
+        match["vendorInfo.tags"] = { $in: tagsArray };
+      }
+    }
+
     const vendors = await User.aggregate([
       { $match: match },
       {
         $lookup: {
-          from: "reviews", // the collection name for reviews
-          localField: "username", // vendor's username in the User model
-          foreignField: "vendor", // vendor field in the Review model
+          from: "reviews", // collection for reviews
+          localField: "username",
+          foreignField: "vendor",
           as: "reviews",
         },
       },

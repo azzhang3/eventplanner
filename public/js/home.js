@@ -97,11 +97,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const vendorSearchForm = document.getElementById("vendorSearchForm");
     vendorSearchForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      // Get filter values from the new fields
       const service = document.getElementById("searchService").value;
+      const name = document.getElementById("searchName").value;
+      const price = document.getElementById("searchPrice").value;
+      const tags = document.getElementById("searchTags").value;
+
+      // Build query string with only provided filters
+      let queryString = "?";
+      if (service) {
+        queryString += "service=" + encodeURIComponent(service) + "&";
+      }
+      if (name) {
+        queryString += "name=" + encodeURIComponent(name) + "&";
+      }
+      if (price) {
+        queryString += "price=" + encodeURIComponent(price) + "&";
+      }
+      if (tags) {
+        queryString += "tags=" + encodeURIComponent(tags) + "&";
+      }
+      // Remove the trailing '&' if present
+      queryString = queryString.slice(0, -1);
+
       try {
-        const response = await fetch(
-          `/vendors?service=${encodeURIComponent(service)}`
-        );
+        const response = await fetch(`/vendors${queryString}`);
         const vendors = await response.json();
         const vendorResultsDiv = document.getElementById("vendorResults");
         if (vendors.length === 0) {
@@ -111,33 +132,31 @@ document.addEventListener("DOMContentLoaded", () => {
         vendorResultsDiv.innerHTML = vendors
           .map((vendor) => {
             const info = vendor.vendorInfo || {};
-            // The average rating
             const avgRating = vendor.averageRating;
             return `
-              <div class="card">
-                <div class="card-content">
-                  <span class="card-title">${info.companyName || "N/A"}</span>
-                  <p><strong>Service:</strong> ${info.service || "N/A"}</p>
-                  <p><strong>Average Cost:</strong> ${
-                    info.averageCost || "N/A"
-                  }</p>
-                  <p>${info.description || ""}</p>
-                  <p>Tags: ${info.tags ? info.tags.join(", ") : ""}</p>
-                  <p>Average Rating: ${renderStars(avgRating)}</p>
-                  <button 
-                    class="btn reserve-btn" 
-                    data-vendor="${vendor.username}" 
-                    data-company-name="${info.companyName || vendor.username}">
-                    Make Reservation
-                </button>
-                  <button class="btn review-btn" data-vendor="${
-                    vendor.username
-                  }">Leave Review</button>
-                </div>
-              </div>
-            `;
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">${info.companyName || "N/A"}</span>
+              <p><strong>Service:</strong> ${info.service || "N/A"}</p>
+              <p><strong>Average Cost:</strong> ${info.averageCost || "N/A"}</p>
+              <p>${info.description || ""}</p>
+              <p>Tags: ${info.tags ? info.tags.join(", ") : ""}</p>
+              <p>Average Rating: ${renderStars(avgRating)}</p>
+              <button 
+                class="btn reserve-btn" 
+                data-vendor="${vendor.username}" 
+                data-company-name="${info.companyName || vendor.username}">
+                Make Reservation
+              </button>
+              <button class="btn review-btn" data-vendor="${
+                vendor.username
+              }">Leave Review</button>
+            </div>
+          </div>
+        `;
           })
           .join("");
+
         document.querySelectorAll(".reserve-btn").forEach((btn) => {
           btn.addEventListener("click", () => {
             // Set the vendor field with the username (for internal logic)
@@ -170,6 +189,56 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Error searching vendors:", error);
       }
     });
+
+    // Add reset functionality for filters
+    document
+      .getElementById("resetFilters")
+      .addEventListener("click", async () => {
+        // Reset the form inputs
+        vendorSearchForm.reset();
+        // Reinitialize Materialize selects (if applicable)
+        M.FormSelect.init(document.querySelectorAll("select"));
+
+        // Trigger a search with no filters
+        try {
+          const response = await fetch("/vendors");
+          const vendors = await response.json();
+          const vendorResultsDiv = document.getElementById("vendorResults");
+          if (vendors.length === 0) {
+            vendorResultsDiv.innerHTML = "<p>No vendors found.</p>";
+            return;
+          }
+          vendorResultsDiv.innerHTML = vendors
+            .map((vendor) => {
+              const info = vendor.vendorInfo || {};
+              const avgRating = vendor.averageRating;
+              return `
+          <div class="card">
+            <div class="card-content">
+              <span class="card-title">${info.companyName || "N/A"}</span>
+              <p><strong>Service:</strong> ${info.service || "N/A"}</p>
+              <p><strong>Average Cost:</strong> ${info.averageCost || "N/A"}</p>
+              <p>${info.description || ""}</p>
+              <p>Tags: ${info.tags ? info.tags.join(", ") : ""}</p>
+              <p>Average Rating: ${renderStars(avgRating)}</p>
+              <button 
+                class="btn reserve-btn" 
+                data-vendor="${vendor.username}" 
+                data-company-name="${info.companyName || vendor.username}">
+                Make Reservation
+              </button>
+              <button class="btn review-btn" data-vendor="${
+                vendor.username
+              }">Leave Review</button>
+            </div>
+          </div>
+        `;
+            })
+            .join("");
+        } catch (error) {
+          console.error("Error resetting filters:", error);
+        }
+      });
 
     const reservationForm = document.getElementById("reservationForm");
     reservationForm.addEventListener("submit", async (e) => {
