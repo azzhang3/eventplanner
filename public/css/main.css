@@ -1,11 +1,11 @@
 /* CSS Variables for easy customization */
 :root {
-  --primary-color: #3498db;
-  --primary-hover: #2980b9;
-  --secondary-color: #2c3e50;
-  --text-color: #34495e;
+  --primary-color: #ff575f;
+  --primary-hover: #e04e55;
+  --secondary-color: #211111;
+  --text-color: #2e2e2e;
   --card-bg: #ffffff;
-  --body-bg: #f7f9fb;
+  --body-bg: #ffe7e9;
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   --transition-duration: 0.3s;
   --border-radius: 8px;
@@ -143,7 +143,7 @@ body {
 .input-field textarea:focus,
 .input-field select:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+  box-shadow: 0 0 8px rgba(255, 87, 95, 0.5);
   outline: none;
 }
 
@@ -289,12 +289,12 @@ nav {
 }
 
 .dark-mode .btn {
-  background: linear-gradient(135deg, #3a8ee6, #337acc);
+  background: linear-gradient(135deg, #ff575f, #e04e55);
   color: #fff;
 }
 
 .dark-mode .btn:hover {
-  background: linear-gradient(135deg, #337acc, #2a6fa0);
+  background: linear-gradient(135deg, #e04e55, #cc434b);
   transform: scale(1.04);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
 }
@@ -308,8 +308,8 @@ nav {
 .dark-mode .input-field input:focus,
 .dark-mode .input-field textarea:focus,
 .dark-mode .input-field select:focus {
-  border-color: #3a8ee6;
-  box-shadow: 0 0 8px rgba(58, 142, 230, 0.7);
+  border-color: #ff575f;
+  box-shadow: 0 0 8px rgba(255, 87, 95, 0.7);
 }
 
 .dark-mode .modal {
@@ -323,18 +323,26 @@ nav {
 }
 
 .dark-mode .time-slot {
-  border: 1px solid #3a8ee6;
+  border: 1px solid #ff575f;
   background-color: #2c2c2c;
   color: #e0e0e0;
 }
 
 .dark-mode .time-slot:hover {
-  background-color: #3a8ee6;
+  background-color: #ff575f;
 }
 
 .dark-mode .time-slot.active {
-  background-color: #3a8ee6;
-  border-color: #337acc;
+  background-color: #ff575f;
+  border-color: #e04e55;
+}
+
+.dark-mode .company-name {
+  color: white !important;
+}
+
+.dark-mode .reservation-name {
+  color: white !important;
 }
 
 /* Label adjustments */
@@ -366,3 +374,31 @@ nav {
     margin-bottom: 15px;
   }
 } */
+
+.ai-suggestion {
+  margin-top: 20px;
+  font-size: 1.3em;
+  color: var(--text-color);
+}
+
+.ai-suggestion a {
+  color: var(--primary-color);
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.ai-suggestion a:hover {
+  color: var(--primary-hover);
+}
+
+.dark-mode .ai-suggestion {
+  color: #e0e0e0;
+}
+
+.dark-mode .ai-suggestion a {
+  color: #ff575f;
+}
+
+.dark-mode .ai-suggestion a:hover {
+  color: #e04e55;
+}
